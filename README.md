@@ -1,7 +1,5 @@
 # Karma - savanorystės organizavimo platforma
 
-## Sprendžiamo uždavinio aprašymas
-
 Projekto tikslas – palengvinti savanoriams surasti savanorystės veiklas, o organizacijoms susirasti savanorius.
 
 ## Sistemos paskirtis
