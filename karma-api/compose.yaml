@@ -1,0 +1,16 @@
+services:
+  db:
+    container_name: "mysql_db"
+    image: 'mysql:8.1.0'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: karma_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - '6033:3306'
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
