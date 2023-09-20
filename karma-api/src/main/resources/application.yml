@@ -1,1 +1,11 @@
-
+spring:
+  datasource:
+    url: jdbc:postgresql://{your_database_url}
+    username: user
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database: postgresql
+  flyway:
+    enabled: true

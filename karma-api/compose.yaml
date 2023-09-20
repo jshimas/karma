@@ -1,16 +1,15 @@
 services:
   db:
-    container_name: "mysql_db"
-    image: 'mysql:8.1.0'
+    image: postgres:15.3
+    container_name: psq_karma_db
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: karma_db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      POSTGRES_DB: karma_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - '6033:3306'
+      - "5432:5432"
     volumes:
-      - db_data:/var/lib/mysql
+      - db-data:/var/lib/postgresql/data
 
 volumes:
-  db_data:
+  db-data:  
