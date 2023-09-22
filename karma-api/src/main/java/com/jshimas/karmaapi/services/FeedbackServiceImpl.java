@@ -11,6 +11,7 @@ import com.jshimas.karmaapi.repositories.FeedbackRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final UserService userService;
     private final FeedbackMapper feedbackMapper;
     private final FeedbackRepository feedbackRepository;
+
     @Override
     public FeedbackViewDTO create(FeedbackEditDTO feedbackDTO,
                                   UUID eventId,
@@ -29,14 +31,23 @@ public class FeedbackServiceImpl implements FeedbackService {
                                   UUID userId) {
 
         Event event = eventService.findEntity(eventId, organizationId);
-        User user = userService.findEntity(userId);
+        // TODO: Use authenticated user when authentication is implemented
+//        User user = userService.findEntity(userId);
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .firstName("John")
+                .lastName("Brown")
+                .email("mail@demo.com")
+                .password("pass")
+                .feedbacks(new ArrayList<>())
+                .build();
 
         return feedbackMapper.toDTO(
                 feedbackRepository.save(feedbackMapper.create(feedbackDTO, event, user)));
     }
 
     @Override
-    public FeedbackViewDTO findById(UUID feedbackId, UUID eventId, UUID organizationId) {
+    public FeedbackViewDTO findFeedback(UUID feedbackId, UUID eventId, UUID organizationId) {
         return feedbackMapper.toDTO(findEntity(feedbackId, eventId, organizationId));
     }
 
@@ -60,7 +71,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
-    public void deleteById(UUID feedbackId, UUID eventId, UUID organizationId) {
+    public void delete(UUID feedbackId, UUID eventId, UUID organizationId) {
         feedbackRepository.delete(findEntity(feedbackId, eventId, organizationId));
     }
 
