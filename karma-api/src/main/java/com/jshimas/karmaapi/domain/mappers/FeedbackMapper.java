@@ -1,44 +1,28 @@
 package com.jshimas.karmaapi.domain.mappers;
 
-import com.jshimas.karmaapi.domain.dto.FeedbackDTO;
-import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
+import com.jshimas.karmaapi.domain.dto.FeedbackEditDTO;
+import com.jshimas.karmaapi.domain.dto.FeedbackViewDTO;
 import com.jshimas.karmaapi.entities.Event;
 import com.jshimas.karmaapi.entities.Feedback;
 import com.jshimas.karmaapi.entities.User;
-import com.jshimas.karmaapi.repositories.EventRepository;
-import com.jshimas.karmaapi.repositories.UserRepository;
-import com.jshimas.karmaapi.services.EventService;
-import com.jshimas.karmaapi.services.UserService;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-import org.mapstruct.ReportingPolicy;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mapstruct.*;
 
-import java.util.UUID;
+import static org.mapstruct.NullValueCheckStrategy.ALWAYS;
+import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
 
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public abstract class FeedbackMapper {
-
-    @Autowired private EventService eventService;
-    @Autowired private UserService userService;
+public interface FeedbackMapper {
 
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "eventId", source = "event.id")
-    public abstract FeedbackDTO toDTO(Feedback feedback);
+    public FeedbackViewDTO toDTO(Feedback feedback);
 
-    @Mapping(target = "user", source = "userId", qualifiedByName = "idToUser")
-    @Mapping(target = "event", source = "eventId", qualifiedByName = "idToEvent")
-    public abstract Feedback toEntity(FeedbackDTO feedbackDTO);
+    @Mapping(target = "id", source = "feedbackDTO.id")
+    @Mapping(target = "user", source = "user")
+    @Mapping(target = "event", source = "event")
+    public Feedback create(FeedbackEditDTO feedbackDTO, Event event, User user);
 
-    @Named("idToUser")
-    protected User idToUser(UUID id) {
-        return userService.findById(id);
-    }
-
-    @Named("idToEvent")
-    protected Event idToEvent(UUID id) {
-        return eventService.findById(id);
-    }
+    @BeanMapping(nullValueCheckStrategy = ALWAYS, nullValuePropertyMappingStrategy = IGNORE)
+    public void updateEntityFromDTO(FeedbackEditDTO feedbackEditDTO, @MappingTarget Feedback feedback);
 }

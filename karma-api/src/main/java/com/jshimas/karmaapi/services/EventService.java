@@ -1,20 +1,17 @@
 package com.jshimas.karmaapi.services;
 
-import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
+import com.jshimas.karmaapi.domain.dto.EventEditDTO;
+import com.jshimas.karmaapi.domain.dto.EventViewDTO;
 import com.jshimas.karmaapi.entities.Event;
-import com.jshimas.karmaapi.repositories.EventRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
-@Service
-@RequiredArgsConstructor
-public class EventService {
-    private final EventRepository eventRepository;
-
-    public Event findById(UUID id) {
-        return eventRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(Event.class, id));
-    }
+public interface EventService {
+    EventViewDTO create(EventEditDTO eventDTO, UUID organizationId);
+    EventViewDTO findById(UUID eventId, UUID organizationId);
+    Event findEntity(UUID eventId, UUID organizationId);
+    List<EventViewDTO> findAllOrganizationEvents(UUID organizationId);
+    void deleteById(UUID eventId, UUID organizationId);
+    EventViewDTO update(UUID eventId, UUID organizationId, EventEditDTO eventDTO);
 }
