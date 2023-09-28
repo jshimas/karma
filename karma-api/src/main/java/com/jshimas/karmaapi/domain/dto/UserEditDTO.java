@@ -4,15 +4,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.UUID;
-
-public record UserCreateDTO(
+public record UserEditDTO(
         @NotNull @NotBlank String firstName,
         @NotNull @NotBlank String lastName,
-        @NotNull @NotBlank @Email String email,
-        @NotNull @NotBlank String role,
-        UUID organizationId,
-        @NotNull @NotBlank String password,
-        @NotNull @NotBlank String passwordConfirm
+        @NotNull @NotBlank String role
 ) {
 }

@@ -3,13 +3,17 @@ package com.jshimas.karmaapi.controllers;
 import com.jshimas.karmaapi.domain.dto.EventEditDTO;
 import com.jshimas.karmaapi.domain.dto.EventNoFeedbackDTO;
 import com.jshimas.karmaapi.domain.dto.EventViewDTO;
+import com.jshimas.karmaapi.entities.UserRole;
 import com.jshimas.karmaapi.services.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -32,10 +36,12 @@ public class EventController {
         return eventService.findAllOrganizationEvents(organizationId);
     }
 
+    @Secured({UserRole.ORGANIZER})
     @PostMapping()
     public ResponseEntity<?> createOrganizationEvent(@PathVariable("organizationId") UUID organizationId,
-                                                     @Valid @RequestBody EventEditDTO eventEditDTO) {
-        EventViewDTO createdEvent = eventService.create(eventEditDTO, organizationId);
+                                                     @Valid @RequestBody EventEditDTO eventEditDTO,
+                                                     @AuthenticationPrincipal Jwt token) {
+        EventViewDTO createdEvent = eventService.create(eventEditDTO, organizationId, token);
 
         URI location = URI.create(
                 String.format("/api/v1/organizations/%s/events/%s", organizationId, createdEvent.id()));
@@ -43,18 +49,22 @@ public class EventController {
         return ResponseEntity.created(location).build();
     }
 
+    @Secured({UserRole.ORGANIZER})
     @PutMapping("/{eventId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateOrganizationEvent(@PathVariable("organizationId") UUID organizationId,
                                         @PathVariable("eventId") UUID eventId,
-                                        @RequestBody EventEditDTO eventEditDTO) {
-        eventService.update(eventId, organizationId, eventEditDTO);
+                                        @RequestBody EventEditDTO eventEditDTO,
+                                        @AuthenticationPrincipal Jwt token) {
+        eventService.update(eventId, organizationId, eventEditDTO, token);
     }
 
+    @Secured({UserRole.ADMIN, UserRole.ORGANIZER})
     @DeleteMapping("/{eventId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteOrganizationEvent(@PathVariable("organizationId") UUID organizationId,
-                                        @PathVariable("eventId") UUID eventId) {
-        eventService.deleteById(eventId, organizationId);
+                                        @PathVariable("eventId") UUID eventId,
+                                        @AuthenticationPrincipal Jwt token) {
+        eventService.deleteById(eventId, organizationId, token);
     }
 }

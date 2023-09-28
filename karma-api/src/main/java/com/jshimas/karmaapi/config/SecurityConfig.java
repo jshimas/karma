@@ -44,14 +44,13 @@ public class SecurityConfig {
         http.authorizeHttpRequests(registry -> registry
                 // Authorization
                 // .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                .anyRequest().permitAll());
 
                 // Public endpoints
-//                .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
-//                .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
 
                 // Private endpoints
-//                .anyRequest().authenticated());
+                .anyRequest().authenticated());
 
         // Set up oauth2 resource server
         http.httpBasic(Customizer.withDefaults());
@@ -94,7 +93,7 @@ public class SecurityConfig {
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         var jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("role");
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
 
         var jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);

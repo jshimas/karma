@@ -13,4 +13,9 @@ public class UserRole {
 
     @Column(name = "role", nullable = false)
     private String role;
+
+    public static final String ADMIN = "ADMIN";
+    public static final String VOLUNTEER = "VOLUNTEER";
+    public static final String UNVERIFIED_ORGANIZER = "UNVERIFIED_ORGANIZER";
+    public static final String ORGANIZER = "ORGANIZER";
 }

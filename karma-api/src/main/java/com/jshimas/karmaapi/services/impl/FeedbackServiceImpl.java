@@ -1,17 +1,22 @@
-package com.jshimas.karmaapi.services;
+package com.jshimas.karmaapi.services.impl;
 
 import com.jshimas.karmaapi.domain.dto.FeedbackEditDTO;
 import com.jshimas.karmaapi.domain.dto.FeedbackViewDTO;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
+import com.jshimas.karmaapi.domain.exceptions.UnauthorizedAccessException;
 import com.jshimas.karmaapi.domain.mappers.FeedbackMapper;
 import com.jshimas.karmaapi.entities.Event;
 import com.jshimas.karmaapi.entities.Feedback;
 import com.jshimas.karmaapi.entities.User;
 import com.jshimas.karmaapi.repositories.FeedbackRepository;
+import com.jshimas.karmaapi.services.AuthService;
+import com.jshimas.karmaapi.services.EventService;
+import com.jshimas.karmaapi.services.FeedbackService;
+import com.jshimas.karmaapi.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -20,9 +25,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService {
     private final EventService eventService;
-    private final UserService userService;
+    private final AuthService authService;
     private final FeedbackMapper feedbackMapper;
     private final FeedbackRepository feedbackRepository;
+    private final UserService userService;
 
     @Override
     public FeedbackViewDTO create(FeedbackEditDTO feedbackDTO,
@@ -32,16 +38,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         Event event = eventService.findEntity(eventId, organizationId);
 
-        // TODO: Use authenticated user when authentication is implemented
-        // User user = userService.findEntity(userId);
-        User user = User.builder()
-                .id(userId)
-                .firstName("John")
-                .lastName("Brown")
-                .email("mail@demo.com")
-                .password("pass")
-                .feedbacks(new ArrayList<>())
-                .build();
+        User user = userService.findEntity(userId);
 
         return feedbackMapper.toDTO(
                 feedbackRepository.save(feedbackMapper.create(feedbackDTO, event, user)));
@@ -72,14 +69,28 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
-    public void delete(UUID feedbackId, UUID eventId, UUID organizationId) {
-        feedbackRepository.delete(findEntity(feedbackId, eventId, organizationId));
+    public void delete(UUID feedbackId, UUID eventId, UUID organizationId, Jwt token) {
+        Feedback feedback = findEntity(feedbackId, eventId, organizationId);
+
+        boolean userIsAuthor = feedback.getUser().getId().equals(authService.extractId(token));
+
+        if (!userIsAuthor && authService.isAdmin(token)) {
+            throw new UnauthorizedAccessException();
+        }
+
+        feedbackRepository.delete(feedback);
     }
 
     @Override
     public FeedbackViewDTO update(UUID feedbackId, UUID eventId, UUID organizationId,
-                                  FeedbackEditDTO feedbackDTO) {
+                                  FeedbackEditDTO feedbackDTO, Jwt token) {
         Feedback feedback = findEntity(feedbackId, eventId, organizationId);
+
+        boolean userIsAuthor = feedback.getUser().getId().equals(authService.extractId(token));
+
+        if (!userIsAuthor) {
+            throw new UnauthorizedAccessException();
+        }
 
         feedbackMapper.updateEntityFromDTO(feedbackDTO, feedback);
         Feedback updatedFeedback = feedbackRepository.save(feedback);

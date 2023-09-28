@@ -2,7 +2,7 @@ package com.jshimas.karmaapi.domain.exceptions;
 
 public class UnauthorizedAccessException extends RuntimeException{
     public UnauthorizedAccessException() {
-        super();
+        super("User does not have a permission to perform this action");
     }
 
     public UnauthorizedAccessException(String message) {

@@ -4,10 +4,10 @@ CREATE TABLE IF NOT EXISTS user_roles (
 );
 
 INSERT INTO user_roles (role) VALUES
-    ('volunteer'),
-    ('unverified_organizer'),
-    ('organizer'),
-    ('admin');
+    ('VOLUNTEER'),
+    ('UNVERIFIED_ORGANIZER'),
+    ('ORGANIZER'),
+    ('ADMIN');
 
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,

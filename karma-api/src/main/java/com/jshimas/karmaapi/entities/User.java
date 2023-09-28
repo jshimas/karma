@@ -32,4 +32,8 @@ public class User {
 
     @CreationTimestamp private Timestamp createdAt;
     @UpdateTimestamp private Timestamp updatedAt;
+
+    public String getRole() {
+        return role.getRole();
+    }
 }

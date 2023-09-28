@@ -1,7 +1,5 @@
 package com.jshimas.karmaapi.controllers;
 
-import com.jshimas.karmaapi.domain.dto.EventEditDTO;
-import com.jshimas.karmaapi.domain.dto.EventViewDTO;
 import com.jshimas.karmaapi.domain.dto.FeedbackEditDTO;
 import com.jshimas.karmaapi.domain.dto.FeedbackViewDTO;
 import com.jshimas.karmaapi.services.FeedbackService;
@@ -9,9 +7,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,15 +40,16 @@ public class FeedbackController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createOrganizationEventFeedback(
+    public ResponseEntity<?> createFeedback(
             @PathVariable UUID organizationId,
             @PathVariable UUID eventId,
-            @Valid @RequestBody FeedbackEditDTO feedbackEditDTO) {
+            @Valid @RequestBody FeedbackEditDTO feedbackEditDTO,
+            Principal principal) {
 
-        //TODO: Update when authentication is implemented
+        UUID userId = UUID.fromString(principal.getName());
 
         FeedbackViewDTO createdFeedback = feedbackService.create(
-                feedbackEditDTO, eventId, organizationId, UUID.fromString("ee6c7f86-2db4-4df2-95f6-6a86bf1c8907"));
+                feedbackEditDTO, eventId, organizationId, userId);
 
         URI location = URI.create(
                 String.format("/api/v1/organizations/%s/events/%s/feedbacks/%s",
@@ -57,20 +60,22 @@ public class FeedbackController {
 
     @PutMapping("/{feedbackId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateOrganizationEventFeedback(@PathVariable UUID organizationId,
-                                        @PathVariable UUID eventId,
-                                        @PathVariable UUID feedbackId,
-                                        @RequestBody FeedbackEditDTO feedbackEditDTO) {
+    public void updateFeedback(@PathVariable UUID organizationId,
+                               @PathVariable UUID eventId,
+                               @PathVariable UUID feedbackId,
+                               @RequestBody FeedbackEditDTO feedbackEditDTO,
+                               @AuthenticationPrincipal Jwt token) {
 
-        feedbackService.update(feedbackId, eventId, organizationId, feedbackEditDTO);
+        feedbackService.update(feedbackId, eventId, organizationId, feedbackEditDTO, token);
     }
 
     @DeleteMapping("/{feedbackId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteOrganizationEvent(@PathVariable UUID organizationId,
+    public void deleteEvent(@PathVariable UUID organizationId,
                                         @PathVariable UUID eventId,
-                                        @PathVariable UUID feedbackId) {
+                                        @PathVariable UUID feedbackId,
+                                        @AuthenticationPrincipal Jwt token) {
 
-        feedbackService.delete(feedbackId, eventId, organizationId);
+        feedbackService.delete(feedbackId, eventId, organizationId, token);
     }
 }

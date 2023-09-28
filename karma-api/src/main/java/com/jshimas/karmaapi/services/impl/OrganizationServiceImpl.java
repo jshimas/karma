@@ -1,12 +1,20 @@
-package com.jshimas.karmaapi.services;
+package com.jshimas.karmaapi.services.impl;
 
 import com.jshimas.karmaapi.domain.dto.OrganizationEditDTO;
 import com.jshimas.karmaapi.domain.dto.OrganizationViewDTO;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
+import com.jshimas.karmaapi.domain.exceptions.UnauthorizedAccessException;
 import com.jshimas.karmaapi.domain.mappers.OrganizationMapper;
 import com.jshimas.karmaapi.entities.Organization;
 import com.jshimas.karmaapi.repositories.OrganizationRepository;
+import com.jshimas.karmaapi.repositories.UserRepository;
+import com.jshimas.karmaapi.services.AuthService;
+import com.jshimas.karmaapi.services.OrganizationService;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +26,7 @@ import java.util.stream.Collectors;
 public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final OrganizationMapper organizationMapper;
+    private final AuthService authService;
 
     @Override
     public OrganizationViewDTO create(OrganizationEditDTO organizationDTO) {
@@ -57,12 +66,19 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public OrganizationViewDTO update(UUID id, OrganizationEditDTO organizationDTO) {
-        Organization exitantOrganization = organizationRepository.findById(id)
+    public OrganizationViewDTO update(UUID id, OrganizationEditDTO organizationDTO, Jwt token) {
+        Organization existingOrganization = organizationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(Organization.class, id));
 
-        organizationMapper.updateEntityFromDTO(organizationDTO, exitantOrganization);
-        Organization updatedOrganization = organizationRepository.save(exitantOrganization);
+        boolean userIsOrganizer = existingOrganization.getOrganizers().stream()
+                .anyMatch(organizer -> organizer.getUser().getId().equals(authService.extractId(token)));
+
+        if (!userIsOrganizer && !authService.isAdmin(token)) {
+            throw new UnauthorizedAccessException();
+        }
+
+        organizationMapper.updateEntityFromDTO(organizationDTO, existingOrganization);
+        Organization updatedOrganization = organizationRepository.save(existingOrganization);
 
         return organizationMapper.toDTO(updatedOrganization);
     }
