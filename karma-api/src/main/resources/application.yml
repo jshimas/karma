@@ -1,11 +1,19 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/karma_db
-    username: user
-    password: password
+    username: postgres
+    password: postgres
   jpa:
     hibernate:
       ddl-auto: validate
     database: postgresql
   flyway:
     enabled: true
+
+jwt:
+  secret:
+    key: 5n/a5etrP2kt6MxenBELZ3sSVuz6SFiPuHgOXpJiuc8=
+
+
+
+

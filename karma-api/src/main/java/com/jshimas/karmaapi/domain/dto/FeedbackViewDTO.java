@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 public record FeedbackViewDTO(
-        UUID id,
+        @NotNull @NotBlank UUID id,
         @NotNull @NotBlank UUID userId,
         @NotNull @NotBlank UUID eventId,
         @NotNull @NotBlank String comment

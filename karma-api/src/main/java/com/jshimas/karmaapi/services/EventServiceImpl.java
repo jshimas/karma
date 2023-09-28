@@ -1,6 +1,7 @@
 package com.jshimas.karmaapi.services;
 
 import com.jshimas.karmaapi.domain.dto.EventEditDTO;
+import com.jshimas.karmaapi.domain.dto.EventNoFeedbackDTO;
 import com.jshimas.karmaapi.domain.dto.EventViewDTO;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
 import com.jshimas.karmaapi.domain.mappers.EventMapper;
@@ -25,8 +26,10 @@ public class EventServiceImpl implements EventService {
     public EventViewDTO create(EventEditDTO eventDTO, UUID organizationId) {
         Organization existantOrganization = organizationService.findEntityById(organizationId);
 
-        return eventMapper.toViewDTO(
+        Event createdEvent = eventRepository.save(
                 eventMapper.create(eventDTO, existantOrganization));
+
+        return eventMapper.toViewDTO(createdEvent);
     }
 
     @Override
@@ -45,11 +48,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventViewDTO> findAllOrganizationEvents(UUID organizationId) {
+    public List<EventNoFeedbackDTO> findAllOrganizationEvents(UUID organizationId) {
         Organization existantOrganization = organizationService.findEntityById(organizationId);
 
         return existantOrganization.getEvents().stream()
-                .map(eventMapper::toViewDTO)
+                .map(eventMapper::toViewWithoutFeedbacksDTO)
                 .collect(Collectors.toList());
     }
 

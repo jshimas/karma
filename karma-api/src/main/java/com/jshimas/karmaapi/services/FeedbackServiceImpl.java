@@ -31,10 +31,11 @@ public class FeedbackServiceImpl implements FeedbackService {
                                   UUID userId) {
 
         Event event = eventService.findEntity(eventId, organizationId);
+
         // TODO: Use authenticated user when authentication is implemented
-//        User user = userService.findEntity(userId);
+        // User user = userService.findEntity(userId);
         User user = User.builder()
-                .id(UUID.randomUUID())
+                .id(userId)
                 .firstName("John")
                 .lastName("Brown")
                 .email("mail@demo.com")

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/organizations/{organizationId}/events/{eventId}/feedbacks")
+@RequestMapping("/api/v1/organizations/{organizationId}/events/{eventId}/feedbacks")
 @RequiredArgsConstructor
 public class FeedbackController {
     private final FeedbackService feedbackService;
@@ -43,13 +43,13 @@ public class FeedbackController {
             @PathVariable UUID eventId,
             @Valid @RequestBody FeedbackEditDTO feedbackEditDTO) {
 
-        // TODO: Update when authentication is implemented
+        //TODO: Update when authentication is implemented
 
         FeedbackViewDTO createdFeedback = feedbackService.create(
-                feedbackEditDTO, eventId, organizationId, UUID.randomUUID());
+                feedbackEditDTO, eventId, organizationId, UUID.fromString("ee6c7f86-2db4-4df2-95f6-6a86bf1c8907"));
 
         URI location = URI.create(
-                String.format("/api/organizations/%s/events/%s/feedbacks/%s",
+                String.format("/api/v1/organizations/%s/events/%s/feedbacks/%s",
                         organizationId, eventId, createdFeedback.id()));
 
         return ResponseEntity.created(location).build();

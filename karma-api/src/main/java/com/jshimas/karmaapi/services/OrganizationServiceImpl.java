@@ -1,6 +1,7 @@
 package com.jshimas.karmaapi.services;
 
-import com.jshimas.karmaapi.domain.dto.OrganizationDTO;
+import com.jshimas.karmaapi.domain.dto.OrganizationEditDTO;
+import com.jshimas.karmaapi.domain.dto.OrganizationViewDTO;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
 import com.jshimas.karmaapi.domain.mappers.OrganizationMapper;
 import com.jshimas.karmaapi.entities.Organization;
@@ -19,7 +20,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationMapper organizationMapper;
 
     @Override
-    public OrganizationDTO create(OrganizationDTO organizationDTO) {
+    public OrganizationViewDTO create(OrganizationEditDTO organizationDTO) {
         Organization organization =
                 organizationRepository.save(organizationMapper.toEntity(organizationDTO));
 
@@ -27,7 +28,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public OrganizationDTO findById(UUID id) {
+    public OrganizationViewDTO findById(UUID id) {
         Organization organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(Organization.class, id));
 
@@ -41,7 +42,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public List<OrganizationDTO> findAll() {
+    public List<OrganizationViewDTO> findAll() {
         return organizationRepository.findAll().stream()
                 .map(organizationMapper::toDTO)
                 .collect(Collectors.toList());
@@ -56,7 +57,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public OrganizationDTO update(UUID id, OrganizationDTO organizationDTO) {
+    public OrganizationViewDTO update(UUID id, OrganizationEditDTO organizationDTO) {
         Organization exitantOrganization = organizationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(Organization.class, id));
 

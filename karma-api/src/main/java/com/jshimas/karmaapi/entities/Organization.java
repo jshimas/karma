@@ -14,20 +14,22 @@ import java.util.UUID;
 
 @Data
 @Entity
+@Table(name = "organizations")
 public class Organization {
     @Id @GeneratedValue(strategy = GenerationType.UUID) private UUID id;
     @NotNull @NotBlank private String name;
     @NotNull @Email private String email;
     @NotNull @NotBlank private String phone;
-    @NotNull @NotBlank private OrganizationType type;
+    @NotNull @ManyToOne @JoinColumn(name = "type_id") private OrganizationType type;
     private String mission;
     private String address;
     private String website;
     private String facebook;
     private String instagram;
     private String youtube;
-    private String linkedIn;
+    private String linkedin;
     @OneToMany(mappedBy = "organization") private List<Event> events;
+    @OneToMany(mappedBy = "organization") private List<Organizer> organizers;
 
     @CreationTimestamp private Timestamp createdAt;
     @UpdateTimestamp private Timestamp updatedAt;

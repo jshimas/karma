@@ -20,12 +20,14 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "users")
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.UUID) private UUID id;
     @NotNull @NotBlank private String firstName;
     @NotNull @NotBlank private String lastName;
-    @NotNull @Email private String email;
+    @NotNull @NotBlank @Email @Column(unique = true) private String email;
     @NotNull @NotBlank private String password;
+    @NotNull @ManyToOne @JoinColumn(name = "role_id") private UserRole role;
     @OneToMany(mappedBy = "user") private List<Feedback> feedbacks;
 
     @CreationTimestamp private Timestamp createdAt;

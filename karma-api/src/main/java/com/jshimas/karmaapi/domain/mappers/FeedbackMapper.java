@@ -16,13 +16,13 @@ public interface FeedbackMapper {
 
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "eventId", source = "event.id")
-    public FeedbackViewDTO toDTO(Feedback feedback);
+    FeedbackViewDTO toDTO(Feedback feedback);
 
-    @Mapping(target = "id", source = "feedbackDTO.id")
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", source = "user")
     @Mapping(target = "event", source = "event")
-    public Feedback create(FeedbackEditDTO feedbackDTO, Event event, User user);
+    Feedback create(FeedbackEditDTO feedbackDTO, Event event, User user);
 
     @BeanMapping(nullValueCheckStrategy = ALWAYS, nullValuePropertyMappingStrategy = IGNORE)
-    public void updateEntityFromDTO(FeedbackEditDTO feedbackEditDTO, @MappingTarget Feedback feedback);
+    void updateEntityFromDTO(FeedbackEditDTO feedbackEditDTO, @MappingTarget Feedback feedback);
 }

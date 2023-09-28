@@ -1,6 +1,7 @@
 package com.jshimas.karmaapi.controllers;
 
 import com.jshimas.karmaapi.domain.dto.EventEditDTO;
+import com.jshimas.karmaapi.domain.dto.EventNoFeedbackDTO;
 import com.jshimas.karmaapi.domain.dto.EventViewDTO;
 import com.jshimas.karmaapi.services.EventService;
 import jakarta.validation.Valid;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/organizations/{organizationId}/events")
+@RequestMapping("/api/v1/organizations/{organizationId}/events")
 @RequiredArgsConstructor
 public class EventController {
     private final EventService eventService;
@@ -27,7 +28,7 @@ public class EventController {
     }
 
     @GetMapping()
-    public List<EventViewDTO> getOrganizationEvents(@PathVariable("organizationId") UUID organizationId) {
+    public List<EventNoFeedbackDTO> getOrganizationEvents(@PathVariable("organizationId") UUID organizationId) {
         return eventService.findAllOrganizationEvents(organizationId);
     }
 
@@ -37,7 +38,7 @@ public class EventController {
         EventViewDTO createdEvent = eventService.create(eventEditDTO, organizationId);
 
         URI location = URI.create(
-                String.format("/api/organizations/%s/events/%s", organizationId, createdEvent.id()));
+                String.format("/api/v1/organizations/%s/events/%s", organizationId, createdEvent.id()));
 
         return ResponseEntity.created(location).build();
     }

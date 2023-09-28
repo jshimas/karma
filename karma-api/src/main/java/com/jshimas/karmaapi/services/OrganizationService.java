@@ -1,16 +1,17 @@
 package com.jshimas.karmaapi.services;
 
-import com.jshimas.karmaapi.domain.dto.OrganizationDTO;
+import com.jshimas.karmaapi.domain.dto.OrganizationEditDTO;
+import com.jshimas.karmaapi.domain.dto.OrganizationViewDTO;
 import com.jshimas.karmaapi.entities.Organization;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface OrganizationService {
-    OrganizationDTO create(OrganizationDTO organizationDTO);
-    OrganizationDTO findById(UUID id);
+    OrganizationViewDTO create(OrganizationEditDTO organizationDTO);
+    OrganizationViewDTO findById(UUID id);
     Organization findEntityById(UUID id);
-    List<OrganizationDTO> findAll();
+    List<OrganizationViewDTO> findAll();
     void deleteById(UUID id);
-    OrganizationDTO update(UUID id, OrganizationDTO organizationDTO);
+    OrganizationViewDTO update(UUID id, OrganizationEditDTO organizationDTO);
 }
