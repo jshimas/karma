@@ -11,6 +11,5 @@ import java.util.UUID;
 public interface UserService {
     User findEntity(UUID id);
     UserViewDTO create(UserCreateDTO userCreateDTO);
-    UserViewDTO getCurrentUser(Jwt token);
     void update(UUID userId, UserEditDTO userEditDTO);
 }

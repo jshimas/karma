@@ -4,6 +4,7 @@ import com.jshimas.karmaapi.domain.dto.UserCreateDTO;
 import com.jshimas.karmaapi.domain.dto.UserEditDTO;
 import com.jshimas.karmaapi.domain.dto.UserViewDTO;
 import com.jshimas.karmaapi.entities.UserRole;
+import com.jshimas.karmaapi.services.AuthService;
 import com.jshimas.karmaapi.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final UserDetailsService userDetailsService;
+    private final AuthService authService;
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
@@ -41,7 +42,7 @@ public class UserController {
 
     @GetMapping("/me")
     public UserViewDTO getAuthenticatedUser(@AuthenticationPrincipal Jwt token) {
-        return userService.getCurrentUser(token);
+        return authService.getCurrentUser(token);
     }
 
     @Secured({UserRole.ADMIN})

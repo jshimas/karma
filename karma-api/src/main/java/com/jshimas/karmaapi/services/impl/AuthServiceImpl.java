@@ -1,19 +1,19 @@
 package com.jshimas.karmaapi.services.impl;
 
-import com.jshimas.karmaapi.domain.dto.AuthRequest;
+import com.jshimas.karmaapi.domain.dto.*;
+import com.jshimas.karmaapi.domain.mappers.UserMapper;
 import com.jshimas.karmaapi.entities.UserRole;
 import com.jshimas.karmaapi.security.SecurityUser;
 import com.jshimas.karmaapi.services.AuthService;
+import com.jshimas.karmaapi.services.AuthTokenService;
+import com.jshimas.karmaapi.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.joining;
@@ -21,38 +21,39 @@ import static java.util.stream.Collectors.joining;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+    private final AuthTokenService tokenService;
     private final AuthenticationManager authenticationManager;
-    private final JwtEncoder jwtEncoder;
+    private final UserMapper userMapper;
+    private final UserService userService;
 
     @Override
-    public String login(AuthRequest authRequest) {
+    public LoginResponseTokens login(AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authRequest.email(), authRequest.password()));
 
         SecurityUser secUser = (SecurityUser) authentication.getPrincipal();
 
-        Instant now = Instant.now();
-        int expiry = 60 * 60 * 24; // 1 day
+        String accessToken = tokenService.generateAccessToken(secUser.getId());
+        String refreshToken = tokenService.generateRefreshToken(secUser.getId());
 
-        String role = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(joining(""));
+        return new LoginResponseTokens(accessToken, refreshToken);
+    }
 
-        var claims =
-                JwtClaimsSet.builder()
-                        .issuer("karma.com")
-                        .issuedAt(now)
-                        .expiresAt(now.plusSeconds(expiry))
-                        .subject(secUser.getId().toString())
-                        .claim("role", role)
-                        .build();
+    @Override
+    public AccessTokenResponse updateAccessToken(RefreshTokenRequest refreshTokenRequest) {
+        return new AccessTokenResponse(tokenService.updateAccessToken(refreshTokenRequest.refreshToken()));
+    }
 
-        return jwtEncoder.encode(
-                JwtEncoderParameters.from(
-                        JwsHeader.with(MacAlgorithm.HS256).type("JWT").build(),
-                        claims))
-                .getTokenValue();
+    @Override
+    public UserViewDTO getCurrentUser(Jwt token) {
+        return userMapper.toDTO(userService.findEntity(extractId(token)));
+    }
+
+    @Override
+    public void logout(Jwt currentUserJwt) {
+        UUID userId = extractId(currentUserJwt);
+        tokenService.deleteRefreshToken(userId);
     }
 
     @Override

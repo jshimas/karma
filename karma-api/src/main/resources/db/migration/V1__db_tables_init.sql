@@ -80,3 +80,11 @@ CREATE TABLE IF NOT EXISTS feedbacks (
     CONSTRAINT event_fk FOREIGN KEY (event_id) REFERENCES events (id),
     CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES users (id)
 );
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    expiry_date TIMESTAMPTZ NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES users (id)
+)

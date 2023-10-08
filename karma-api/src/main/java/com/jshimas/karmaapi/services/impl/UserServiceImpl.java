@@ -9,6 +9,7 @@ import com.jshimas.karmaapi.entities.Organization;
 import com.jshimas.karmaapi.entities.Organizer;
 import com.jshimas.karmaapi.entities.User;
 import com.jshimas.karmaapi.entities.UserRole;
+import com.jshimas.karmaapi.repositories.OrganizationRepository;
 import com.jshimas.karmaapi.repositories.OrganizerRepository;
 import com.jshimas.karmaapi.repositories.UserRepository;
 import com.jshimas.karmaapi.services.AuthService;
@@ -29,9 +30,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final OrganizationService organizationService;
+    private final OrganizationRepository organizationRepository;
     private final OrganizerRepository organizerRepository;
-    private final AuthService authService;
 
     @Override
     public User findEntity(UUID id) {
@@ -85,7 +85,8 @@ public class UserServiceImpl implements UserService {
                 throw new ValidationException("organizationId is required for the organizer role.");
             }
 
-            Organization organization = organizationService.findEntityById(userCreateDTO.organizationId());
+            Organization organization = organizationRepository.findById(userCreateDTO.organizationId())
+                    .orElseThrow(() -> new NotFoundException(Organization.class, userCreateDTO.organizationId()));
 
             Organizer organizer = Organizer.builder()
                     .organization(organization)
@@ -95,16 +96,6 @@ public class UserServiceImpl implements UserService {
             Organizer createdOrganizer = organizerRepository.save(organizer);
             organization.getOrganizers().add(createdOrganizer);
         }
-    }
-
-    @Override
-    public UserViewDTO getCurrentUser(Jwt token) {
-        UUID id = authService.extractId(token);
-
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(User.class, id));
-
-        return userMapper.toDTO(user);
     }
 
     @Override
