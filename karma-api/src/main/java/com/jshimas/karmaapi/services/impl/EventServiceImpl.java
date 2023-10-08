@@ -29,7 +29,7 @@ public class EventServiceImpl implements EventService {
     private final AuthService authService;
 
     @Override
-    public EventViewDTO create(EventEditDTO eventDTO, UUID organizationId, Jwt token) {
+    public EventNoFeedbackDTO create(EventEditDTO eventDTO, UUID organizationId, Jwt token) {
         Organization existantOrganization = organizationService.findEntityById(organizationId);
 
         boolean userIsOrganizer = existantOrganization.getOrganizers().stream()
@@ -42,7 +42,7 @@ public class EventServiceImpl implements EventService {
         Event createdEvent = eventRepository.save(
                 eventMapper.create(eventDTO, existantOrganization));
 
-        return eventMapper.toViewDTO(createdEvent);
+        return eventMapper.toViewWithoutFeedbacksDTO(createdEvent);
     }
 
     @Override

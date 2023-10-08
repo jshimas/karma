@@ -38,25 +38,25 @@ public class EventController {
 
     @Secured({UserRole.ORGANIZER})
     @PostMapping()
-    public ResponseEntity<?> createOrganizationEvent(@PathVariable("organizationId") UUID organizationId,
+    public ResponseEntity<EventNoFeedbackDTO> createOrganizationEvent(@PathVariable("organizationId") UUID organizationId,
                                                      @Valid @RequestBody EventEditDTO eventEditDTO,
                                                      @AuthenticationPrincipal Jwt token) {
-        EventViewDTO createdEvent = eventService.create(eventEditDTO, organizationId, token);
+        EventNoFeedbackDTO createdEvent = eventService.create(eventEditDTO, organizationId, token);
 
         URI location = URI.create(
                 String.format("/api/v1/organizations/%s/events/%s", organizationId, createdEvent.id()));
 
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(createdEvent);
     }
 
     @Secured({UserRole.ORGANIZER})
     @PutMapping("/{eventId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateOrganizationEvent(@PathVariable("organizationId") UUID organizationId,
+    public EventViewDTO updateOrganizationEvent(@PathVariable("organizationId") UUID organizationId,
                                         @PathVariable("eventId") UUID eventId,
                                         @RequestBody EventEditDTO eventEditDTO,
                                         @AuthenticationPrincipal Jwt token) {
-        eventService.update(eventId, organizationId, eventEditDTO, token);
+
+        return eventService.update(eventId, organizationId, eventEditDTO, token);
     }
 
     @Secured({UserRole.ADMIN, UserRole.ORGANIZER})

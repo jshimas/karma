@@ -1,11 +1,13 @@
 package com.jshimas.karmaapi.domain.mappers;
 
 import com.jshimas.karmaapi.domain.dto.OrganizationEditDTO;
+import com.jshimas.karmaapi.domain.dto.OrganizationNoEventsDTO;
 import com.jshimas.karmaapi.domain.dto.OrganizationViewDTO;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
 import com.jshimas.karmaapi.entities.Organization;
 import com.jshimas.karmaapi.entities.OrganizationType;
 import com.jshimas.karmaapi.repositories.OrganizationTypeRepository;
+import jakarta.validation.ValidationException;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,6 +24,9 @@ public abstract class OrganizationMapper {
     @Mapping(target = "type", source = "type", qualifiedByName = "organizationTypeToString")
     public abstract OrganizationViewDTO toDTO(Organization organization);
 
+    @Mapping(target = "type", source = "type", qualifiedByName = "organizationTypeToString")
+    public abstract OrganizationNoEventsDTO toNoEventsDTO(Organization organization);
+
     @Mapping(target = "type", source = "type", qualifiedByName = "stringToOrganizationType")
     public abstract Organization toEntity(OrganizationEditDTO organizationDTO);
 
@@ -32,8 +37,8 @@ public abstract class OrganizationMapper {
     @Named("stringToOrganizationType")
     protected OrganizationType stringToOrganizationType(String type) {
         return organizationTypeRepository.findByTypeNameIgnoreCase(type)
-                .orElseThrow(() -> new NotFoundException(
-                        String.format("Organization type %s not found", type)));
+                .orElseThrow(() -> new ValidationException(
+                        String.format("Organization type %s is not valid", type)));
     }
 
     @Named("organizationTypeToString")
