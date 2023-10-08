@@ -23,13 +23,13 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
 
     @Override
-    public EventViewDTO create(EventEditDTO eventDTO, UUID organizationId) {
+    public EventNoFeedbackDTO create(EventEditDTO eventDTO, UUID organizationId) {
         Organization existantOrganization = organizationService.findEntityById(organizationId);
 
         Event createdEvent = eventRepository.save(
                 eventMapper.create(eventDTO, existantOrganization));
 
-        return eventMapper.toViewDTO(createdEvent);
+        return eventMapper.toViewWithoutFeedbacksDTO(createdEvent);
     }
 
     @Override

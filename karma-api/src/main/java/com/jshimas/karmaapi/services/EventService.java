@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EventService {
-    EventViewDTO create(EventEditDTO eventDTO, UUID organizationId);
+    EventNoFeedbackDTO create(EventEditDTO eventDTO, UUID organizationId);
     EventViewDTO findById(UUID eventId, UUID organizationId);
     Event findEntity(UUID eventId, UUID organizationId);
     List<EventNoFeedbackDTO> findAllOrganizationEvents(UUID organizationId);

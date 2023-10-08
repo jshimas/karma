@@ -38,7 +38,7 @@ public class FeedbackController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createOrganizationEventFeedback(
+    public ResponseEntity<FeedbackViewDTO> createOrganizationEventFeedback(
             @PathVariable UUID organizationId,
             @PathVariable UUID eventId,
             @Valid @RequestBody FeedbackEditDTO feedbackEditDTO) {
@@ -52,17 +52,16 @@ public class FeedbackController {
                 String.format("/api/v1/organizations/%s/events/%s/feedbacks/%s",
                         organizationId, eventId, createdFeedback.id()));
 
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(createdFeedback);
     }
 
     @PutMapping("/{feedbackId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateOrganizationEventFeedback(@PathVariable UUID organizationId,
+    public FeedbackViewDTO updateOrganizationEventFeedback(@PathVariable UUID organizationId,
                                         @PathVariable UUID eventId,
                                         @PathVariable UUID feedbackId,
                                         @RequestBody FeedbackEditDTO feedbackEditDTO) {
 
-        feedbackService.update(feedbackId, eventId, organizationId, feedbackEditDTO);
+        return feedbackService.update(feedbackId, eventId, organizationId, feedbackEditDTO);
     }
 
     @DeleteMapping("/{feedbackId}")

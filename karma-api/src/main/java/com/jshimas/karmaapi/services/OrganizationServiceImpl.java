@@ -1,6 +1,7 @@
 package com.jshimas.karmaapi.services;
 
 import com.jshimas.karmaapi.domain.dto.OrganizationEditDTO;
+import com.jshimas.karmaapi.domain.dto.OrganizationNoEventsDTO;
 import com.jshimas.karmaapi.domain.dto.OrganizationViewDTO;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
 import com.jshimas.karmaapi.domain.mappers.OrganizationMapper;
@@ -20,11 +21,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationMapper organizationMapper;
 
     @Override
-    public OrganizationViewDTO create(OrganizationEditDTO organizationDTO) {
+    public OrganizationNoEventsDTO create(OrganizationEditDTO organizationDTO) {
         Organization organization =
                 organizationRepository.save(organizationMapper.toEntity(organizationDTO));
 
-        return organizationMapper.toDTO(organization);
+        return organizationMapper.toNoEventsDTO(organization);
     }
 
     @Override
@@ -42,9 +43,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public List<OrganizationViewDTO> findAll() {
+    public List<OrganizationNoEventsDTO> findAll() {
         return organizationRepository.findAll().stream()
-                .map(organizationMapper::toDTO)
+                .map(organizationMapper::toNoEventsDTO)
                 .collect(Collectors.toList());
     }
 
