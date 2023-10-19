@@ -4,9 +4,11 @@ import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
 import com.jshimas.karmaapi.entities.RefreshToken;
 import com.jshimas.karmaapi.entities.User;
 import com.jshimas.karmaapi.repositories.RefreshTokenRepository;
+import com.jshimas.karmaapi.security.HmacSha256Hasher;
 import com.jshimas.karmaapi.security.SecurityUser;
 import com.jshimas.karmaapi.services.AuthTokenService;
 import com.jshimas.karmaapi.services.UserService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +40,9 @@ public class AuthTokenServiceImpl implements AuthTokenService {
     @Value("${jwt.expiration.refresh}")
     private long refreshExpirationMs;
 
+    @Value("${jwt.secret.key}")
+    private String secretKey;
+
     @Override
     public String generateAccessToken(UUID userId) {
         User user = userService.findEntity(userId);
@@ -64,9 +69,12 @@ public class AuthTokenServiceImpl implements AuthTokenService {
     @Override
     public String generateRefreshToken(UUID userId) {
         User user = userService.findEntity(userId);
+
+        refreshTokenRepository.findByUser(user).ifPresent(refreshTokenRepository::delete);
+
         Instant expiryDate = Instant.now().plusMillis(refreshExpirationMs);
         String token = UUID.randomUUID().toString();
-        String encodedToken = passwordEncoder.encode(token);
+        String encodedToken = HmacSha256Hasher.hash(secretKey, token);
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
@@ -81,8 +89,9 @@ public class AuthTokenServiceImpl implements AuthTokenService {
 
     @Override
     public String updateAccessToken(String refreshToken) {
-        RefreshToken rt = refreshTokenRepository.findByToken(passwordEncoder.encode(refreshToken))
-                .orElseThrow(() -> new NotFoundException(
+        String encodedToken = HmacSha256Hasher.hash(secretKey, refreshToken);
+        RefreshToken rt = refreshTokenRepository.findByToken(encodedToken)
+                .orElseThrow(() -> new ValidationException(
                         String.format("Refresh token: %s is not valid", refreshToken)));
 
         if (rt.getExpiryDate().compareTo(Instant.now()) < 0) {
@@ -93,7 +102,8 @@ public class AuthTokenServiceImpl implements AuthTokenService {
         return generateAccessToken(rt.getUser().getId());
     }
 
+    @Transactional
     public void deleteRefreshToken(UUID userId) {
-        refreshTokenRepository.deleteByUser(userService.findEntity(userId));
+        refreshTokenRepository.deleteByUserId(userId);
     }
 }

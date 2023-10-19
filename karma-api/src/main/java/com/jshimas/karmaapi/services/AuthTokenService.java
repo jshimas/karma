@@ -1,7 +1,5 @@
 package com.jshimas.karmaapi.services;
 
-import com.jshimas.karmaapi.security.SecurityUser;
-
 import java.util.UUID;
 
 public interface AuthTokenService {

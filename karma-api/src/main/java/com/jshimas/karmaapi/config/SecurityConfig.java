@@ -47,6 +47,7 @@ public class SecurityConfig {
 
                 // Public endpoints
                 .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/refresh-token").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
 
                 // Private endpoints

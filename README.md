@@ -1,51 +1,57 @@
-# Karma - savanorystės organizavimo platforma
+# Karma - Volunteer Organization Platform
 
-Projekto tikslas – palengvinti savanoriams surasti savanorystės veiklas, o organizacijoms susirasti savanorius.
+**Disclaimer: This project represents a draft for a bachelor's thesis project, and functional requirements are subject to change in the future.**
 
-## Sistemos paskirtis
+## About Karma
 
-„Karma“ sistemos paskirtis yra suvesti savanorius su organizacijomis savanoriškos veiklos tikslui. Savanoris norintis ieškoti organizuojamų savanorystės renginių gali tai daryti neprisijungęs prie sistemos. Tačiau norintis pateikti savanorystės paraišką turės prisijungti prie paskyros. Prisiregistravęs prie sistemos savanoris galės peržiūrėti siūlomų veiklų sąrašą, gauti rekomenduojamas savanorystės pozicijas, rasti šalia esančias savanorystės veiklas, kaupti atliktas savanorystės valandas, įmonių rekomendacijas. Iš kitos pusės organizacijos prisijungusios prie sistemos galės kurti renginius, priimti arba atmesti savanorių paraiškas, užregistruoti savanorio atliktas valandas arba parašyti atsiliepimą apie savanorį.
+The goal of the Karma project is to facilitate the process of connecting volunteers with volunteer activities and helping organizations find volunteers.
 
-### Funkciniai reikalavimai
+## System Purpose
 
-Neregistruotas sistemos naudotojas – savanoris galės:
+The purpose of the "Karma" system is to bring volunteers together with organizations for volunteer activities. A volunteer looking for organized volunteer events can do so without registering in the system. However, to submit a volunteer application, they will need to create an account. Once registered in the system, a volunteer can view a list of available activities, receive recommended volunteer positions, find nearby volunteer activities, record completed volunteer hours, and access recommendations from companies. On the other hand, organizations that have joined the system can create events, accept or reject volunteer applications, log volunteer hours, or provide feedback about the volunteer.
 
-1. Peržiūrėti savanorystės veiklų sąrašą/kalendorių
-2. Peržiūrėti konkretų savanorystės pasiūlymą
-3. Prisijungti prie sistemos
+### Functional Requirements
 
-Registruotas sistemos naudotojas – savanoris galės:
+#### Unregistered System User (Volunteer) can:
 
-1. Peržiūrėti savanorystės veiklų sąrašą
-2. Peržiūrėti konkretų savanorystės pasiūlymą
-3. Pateikti paraišką į savanorišką veiklą
-4. Peržiūrėti ir redaguoti savo profilį
-5. Peržiūrėti rekomendacijų sąrašą
-6. Priimti arba atmesti patvirtinimo laukiančią rekomendaciją
-7. Parašyti atsiliepimą apie organizaciją
-8. Kaupti savanorystės valandas. Už sukauptas valandas įsigyti rėmėjų nuolaidos kodus
+1. View the list/calendar of volunteer activities.
+2. View a specific volunteer activity proposal.
+3. Log in to the system.
 
-Registruotas sistemos naudotojas – organizacija galės:
+#### Registered System User (Volunteer) can:
 
-1. Valdyti savo savanorystės pozicijas: peržiūrėti, redaguoti, naikinti, sukurti
-2. Rašyti savanorių rekomendacijas
-3. Peržiūrėti turimų savanorių sąrašą
-4. Peržiūrėti savanorio profilį
-5. Priimti arba atmesti savanorių paraiškas dėl savanoriškos veiklos
+1. View the list of volunteer activities.
+2. View a specific volunteer activity proposal.
+3. Submit an application for volunteer work.
+4. View and edit their profile.
+5. View a list of recommendations.
+6. Accept or reject pending recommendations.
+7. Write feedback about an organization.
+8. Accumulate volunteer hours to acquire sponsor discount codes.
 
-Administratorius galės:
+#### Registered System User (Organization) can:
 
-1. Patvirtinti organizacijos paskyrą
-2. Peržiūrėti arba šalinti naudotojų ar organizacijų paskyras
-3. Šalinti savanoriškos veiklos skelbimus
+1. Manage volunteer positions: view, edit, delete, create.
+2. Write recommendations for volunteers.
+3. View the list of available volunteers.
+4. View a volunteer's profile.
+5. Accept or reject volunteer applications for volunteer activities.
 
-## Sistemos architektūra
+#### Administrator can:
 
-### Naudojamos technologijos:
+1. Approve an organization's account.
+2. View or delete user or organization accounts.
+3. Remove volunteer activity listings.
 
-- Kliento pusė - TypeScript, React.js, Tailwind, Redux
-- Serverio pusė – Java, Spring Boot, Hibernate ORM, PostgreSQL
+## System Architecture
 
-### Sistemos diegimas
+### Technologies Planning to Used:
 
-Internetinė aplikacija bus pasiekiama su HTTP. Sistemos duomenų manipuliavimui bus naudojamas REST API, kuris vykdys duomenų mainus su Karma duomenų baze valdoma PostgreSQL DBVS. Patogesniam duomenų valdymui bus naudojamas ORM.
+- Frontend - TypeScript, React.js, Tailwind, Redux
+- Backend - Java, Spring Boot, Hibernate ORM, PostgreSQL
+
+### System Deployment
+
+The web application will be accessible through HTTP. Data manipulation within the system will be facilitated using a REST API, which will manage data exchanges with the Karma database powered by PostgreSQL DBMS. An ORM will be used for more convenient data management.
+
+Please note that this document represents a preliminary overview of the "Karma" project for a bachelor's thesis and may undergo changes to its functional requirements in the future.

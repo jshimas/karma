@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +22,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseTokens>login(@Valid @RequestBody  AuthRequest authRequest) {
+    public ResponseEntity<LoginResponseTokens>login(@Valid @RequestBody AuthRequest authRequest) {
         try {
             LoginResponseTokens tokens = authService.login(authRequest);
 
