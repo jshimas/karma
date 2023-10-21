@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database: postgresql
+  flyway:
+    enabled: true
+
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
+  expiration:
+    access: 600000  # 10 minutes
+    refresh: 2592000000  # 30 days
+
+
+
+

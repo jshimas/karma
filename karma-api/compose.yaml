@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        SPRING_PROFILE: ""
     container_name: karma-app
     ports:
       - "8080:8080"

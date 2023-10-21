@@ -14,4 +14,5 @@ COPY --from=build /app/target/karma-api-0.0.1.jar /app/app.jar
 EXPOSE 8080
 RUN chown -R javauser:javauser /app
 USER javauser
+RUN echo "$SPRING_PROFILES_ACTIVE"
 CMD ["java", "-jar", "app.jar"]
