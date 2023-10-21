@@ -1,0 +1,12 @@
+spec:
+  name: sample-monorepo
+  services:
+    - name: karma-api
+      git:
+        branch: main
+        repo_clone_url: https://github.com/jshimas/karma-volunteer-platform.git
+      source_dir: karma-api
+      dockerfile_path: karma-api/Dockerfile
+      routes:
+        - path: /karma-api
+
