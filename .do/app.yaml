@@ -2,11 +2,11 @@ spec:
   name: karma-volunteer-platform
   services:
     - name: api
-      git:
+      github:
+        repo: jshimas/karma-volunteer-platform
         branch: main
-        repo_clone_url: https://github.com/jshimas/karma-volunteer-platform.git
+        deploy_on_push: true
       source_dir: karma-api
       dockerfile_path: karma-api/Dockerfile
       routes:
         - path: /karma-api
-
