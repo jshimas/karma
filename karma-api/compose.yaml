@@ -1,7 +1,27 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: karma-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/karma_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL-AUTO: validate
+      SPRING_JPA_DATABASE: postgresql
+      FLYWAY_ENABLED: true
+      JWT_SECRET_KEY: 5n/a5etrP2kt6MxenBELZ3sSVuz6SFiPuHgOXpJiuc8=
+      JWT_EXPIRATION_ACCESS: 600000
+      JWT_EXPIRATION_REFRESH: 2592000000
+
   db:
     image: postgis/postgis:16-3.4
-    container_name: psql_karma_db
+    container_name: karma-db-psql
     environment:
       POSTGRES_DB: karma_db
       POSTGRES_USER: postgres
