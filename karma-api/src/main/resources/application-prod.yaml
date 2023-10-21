@@ -14,7 +14,3 @@ jwt:
   expiration:
     access: 600000  # 10 minutes
     refresh: 2592000000  # 30 days
-
-
-
-
