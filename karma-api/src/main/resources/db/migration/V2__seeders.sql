@@ -1,7 +1,7 @@
 INSERT INTO users (id, first_name, last_name, email, role_id, password, created_at, updated_at)
 VALUES
-    ('d49d2e22-2b6b-4d8c-9f8d-9f24495e1662', 'John', 'Doe', 'volunteer@karma.com', 1, '$2a$10$X8C9/S5NLVIXP.OTvZM92OVNt8lH3LFZEpsdEWNZKDBa0FrRv8MSG', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('ee6c7f86-2db4-4df2-95f6-6a86bf1c8907', 'Jane', 'Smith', 'admin@karma.com', 4, '$2a$10$3P.C7ox0P89rmbEPwpjOXu5xgl8fWc9wib0EulvLEYwpUcUBOq1Pe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('d49d2e22-2b6b-4d8c-9f8d-9f24495e1662', 'John', 'Doe', 'volunteer@karma.com', 1, '$2a$10$UJF3uMya1znpMCh.nelM0us9SR0DJuwRp.EhtFGyztkToX1dvtkLu', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('ee6c7f86-2db4-4df2-95f6-6a86bf1c8907', 'Jane', 'Smith', 'admin@karma.com', 4, '$2a$10$12SUCPMO7XmG57RjbNpz0.K85qNbJIzSc7xldEgyf65EOg5oqMDlC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Insert fake data into organizations
 INSERT INTO organizations (id, name, email, phone, type_id, mission, address, website, facebook, instagram, youtube, linkedin, created_at, updated_at)
