@@ -20,7 +20,7 @@ public record OrganizationViewDTO(
         String facebook,
         String instagram,
         String youtube,
-        String linkedIn,
+        String linkedin,
         List<EventViewDTO> events,
 
         Timestamp createdAt,

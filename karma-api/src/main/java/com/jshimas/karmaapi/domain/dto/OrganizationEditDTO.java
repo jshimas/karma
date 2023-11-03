@@ -17,7 +17,7 @@ public record OrganizationEditDTO(
         String facebook,
         String instagram,
         String youtube,
-        String linkedIn,
+        String linkedin,
 
         Timestamp createdAt,
         Timestamp updatedAt
