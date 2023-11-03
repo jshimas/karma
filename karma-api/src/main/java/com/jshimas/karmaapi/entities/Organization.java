@@ -28,8 +28,8 @@ public class Organization {
     private String instagram;
     private String youtube;
     private String linkedin;
-    @OneToMany(mappedBy = "organization") private List<Event> events;
-    @OneToMany(mappedBy = "organization") private List<Organizer> organizers;
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL) private List<Event> events;
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL) private List<Organizer> organizers;
 
     @CreationTimestamp private Timestamp createdAt;
     @UpdateTimestamp private Timestamp updatedAt;
