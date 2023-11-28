@@ -50,11 +50,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const jwt = jwtDecode<JwtPayload>(token);
 
+      console.log();
+
       if (
         !user &&
         jwt &&
         jwt.exp &&
-        jwt.exp > Number(new Date() && status === "idle")
+        jwt.exp > Number(new Date()) &&
+        status === "idle"
       ) {
         setStatus("loading");
         try {

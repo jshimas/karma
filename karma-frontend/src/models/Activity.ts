@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FeedbackListSchema } from "./Feedback";
 
 const GeoPointDTOSchema = z.object({
   lat: z.number(),
@@ -7,17 +8,23 @@ const GeoPointDTOSchema = z.object({
 
 export const ActivityEditSchema = z.object({
   name: z.string(),
-  startDate: z.date(),
+  startDate: z.number(),
   description: z.string(),
   duration: z.string(),
   location: z.string(),
-  geoLocation: GeoPointDTOSchema.optional(),
+  geoLocation: GeoPointDTOSchema.nullable(),
 });
 
 export const ActivitySchema = ActivityEditSchema.merge(
   z.object({
     id: z.string(),
     organizationId: z.string(),
+  })
+);
+
+export const ActivityWithFeedbackSchema = ActivitySchema.merge(
+  z.object({
+    feedbacks: FeedbackListSchema,
   })
 );
 

@@ -1,10 +1,13 @@
 import { z } from "zod";
 import { HasIDSchema } from "./Common";
+import { ActivityListSchema } from "./Activity";
 
 export const OrganizationEditSchema = z.object({
   name: z.string(),
   email: z.string().email(),
-  phone: z.string(),
+  phone: z
+    .string()
+    .regex(/^[\\+]?[(]?[0-9]{3}[)]?[-\s\\.]?[0-9]{3}[-\s\\.]?[0-9]{4,6}$/),
   type: z.string(),
   mission: z.string().optional(),
   address: z.string().optional(),
@@ -21,6 +24,10 @@ export const OrganizationEditSchema = z.object({
 });
 
 export const OrganizationSchema = OrganizationEditSchema.merge(HasIDSchema);
+
+export const OrganizationWithEventsSchema = OrganizationSchema.merge(
+  z.object({ events: ActivityListSchema })
+);
 
 export const OrganizationListSchema = z.array(OrganizationSchema);
 

@@ -32,7 +32,7 @@ const router = createBrowserRouter([
         element: <ActivitiesPage />,
       },
       {
-        path: "organizations",
+        path: "/organizations",
         children: [
           {
             index: true,
@@ -43,19 +43,19 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: "organizations/:organizationId",
+            path: "/organizations/:organizationId",
             element: <OrganizationPage />,
           },
           {
-            path: "organizations/:organizationId/edit",
+            path: "/organizations/:organizationId/edit",
             element: (
               <ProtectedRoute roles={["admin", "organizer"]}>
-                <OrganizationEditPage />,
+                <OrganizationEditPage />
               </ProtectedRoute>
             ),
           },
           {
-            path: "organizations/create",
+            path: "/organizations/create",
             element: (
               <ProtectedRoute roles={["admin"]}>
                 <OrganizationCreatePage />
@@ -63,14 +63,14 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: "organizations/:organizationId/activities",
+            path: "/organizations/:organizationId/activities",
             children: [
               {
-                path: "organizations/:organizationId/activities/:activityId",
+                path: "/organizations/:organizationId/activities/:activityId",
                 element: <ActivityPage />,
               },
               {
-                path: "organizations/:organizationId/activities/create",
+                path: "/organizations/:organizationId/activities/create",
                 element: (
                   <ProtectedRoute roles={["organizer"]}>
                     <ActivityCreatePage />
@@ -78,7 +78,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "organizations/:organizationId/activities/:activityId/edit",
+                path: "/organizations/:organizationId/activities/:activityId/edit",
                 element: (
                   <ProtectedRoute roles={["admin", "organizer"]}>
                     <ActivityEditPage />

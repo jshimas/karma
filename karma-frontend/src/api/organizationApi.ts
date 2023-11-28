@@ -1,20 +1,22 @@
 import { z } from "zod";
 import api, { HTTPMethod } from "./api";
-import { VoidSchema } from "../models/Common";
+import { EmptySchema, VoidSchema } from "../models/Common";
 import {
+  OrganizationEditSchema,
   OrganizationListSchema,
   OrganizationSchema,
+  OrganizationWithEventsSchema,
 } from "../models/Organization";
 
 export const getOrganization = api<
   z.infer<typeof VoidSchema>,
-  z.infer<typeof OrganizationSchema>,
+  z.infer<typeof OrganizationWithEventsSchema>,
   { id: string }
 >({
   method: HTTPMethod.GET,
   path: "/organizations/:id",
   requestSchema: VoidSchema,
-  responseSchema: OrganizationSchema,
+  responseSchema: OrganizationWithEventsSchema,
 });
 
 export const getAllOrganizations = api<
@@ -26,4 +28,37 @@ export const getAllOrganizations = api<
   path: "/organizations",
   requestSchema: VoidSchema,
   responseSchema: OrganizationListSchema,
+});
+
+export const createOrganization = api<
+  z.infer<typeof OrganizationEditSchema>,
+  z.infer<typeof OrganizationSchema>,
+  undefined
+>({
+  method: HTTPMethod.POST,
+  path: "/organizations",
+  requestSchema: OrganizationEditSchema,
+  responseSchema: OrganizationSchema,
+});
+
+export const updateOrganization = api<
+  z.infer<typeof OrganizationEditSchema>,
+  z.infer<typeof OrganizationWithEventsSchema>,
+  { id: string }
+>({
+  method: HTTPMethod.PUT,
+  path: "/organizations/:id",
+  requestSchema: OrganizationEditSchema,
+  responseSchema: OrganizationWithEventsSchema,
+});
+
+export const deleteOrganization = api<
+  z.infer<typeof VoidSchema>,
+  z.infer<typeof EmptySchema>,
+  { id: string }
+>({
+  method: HTTPMethod.DELETE,
+  path: "/organizations/:id",
+  requestSchema: VoidSchema,
+  responseSchema: EmptySchema,
 });

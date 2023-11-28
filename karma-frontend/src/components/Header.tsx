@@ -5,8 +5,8 @@ export default function Header() {
   const [isMenuOpen, setMenuOpen] = useState<boolean>(false);
 
   return (
-    <div className="h-14 flex items-center sm:gap-8 border-b-2 border-teal-800 px-8 justify-between">
-      <button className="uppercase text-2xl tracking-wide font-light text-teal-900">
+    <div className="h-14 flex items-center sm:gap-8 border-b-2 border-teal-700 px-8 justify-between">
+      <button className="uppercase text-2xl tracking-wide font-light text-teal-700">
         Karma
       </button>
       {/* Show how menu on large screeens */}
@@ -32,15 +32,15 @@ export default function Header() {
         <div className="space-x-4 h-2/3 flex justify-center">
           <Link
             to={"login"}
-            className="transition-all px-4 border-4 border-teal-700 text-teal-700 font-semibold flex items-center hover:bg-teal-50 "
+            className="transition-all px-4 border-2 rounded-md border-teal-700 text-teal-700 font-semibold flex items-center hover:bg-teal-50 "
           >
-            <p className="-translate-y-0.5">Log in</p>
+            <p className="">Log in</p>
           </Link>
           <Link
             to={"/signup"}
-            className="transition-all px-4 bg-teal-700 text-white font-semibold flex items-center hover:bg-teal-800 active:bg-teal-900"
+            className="transition-all px-4 rounded-md bg-teal-700 text-white font-semibold flex items-center hover:bg-teal-800 active:bg-teal-900"
           >
-            <p className="-translate-y-0.5">Sign up</p>
+            <p className="">Sign up</p>
           </Link>
         </div>
       </div>

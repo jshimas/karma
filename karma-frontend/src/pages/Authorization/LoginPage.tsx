@@ -4,7 +4,7 @@ import LoginForm from "../../components/LoginForm";
 
 export default function LoginPage() {
   return (
-    <div className="bg-slate-50 flex flex-col h-screen">
+    <div className="bg-slate-50 flex flex-col h-screen font-nunito">
       <div className="p-6">
         <Link
           to={"/"}
