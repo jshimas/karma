@@ -57,14 +57,14 @@ export default function OrganizationPage() {
           <p className="uppercase mb-2">Contacts</p>
           <div className="flex gap-6 mb-6">
             <div className="flex flex-col gap-2 font-semibold">
-              <p>Address</p>
-              <p>Phone</p>
-              <p>Website</p>
+              {organization.address && <p>Address</p>}
+              {organization.phone && <p>Phone</p>}
+              {organization.website && <p>Website</p>}
             </div>
             <div className="flex flex-col gap-2">
-              <p>{organization.address}</p>
-              <p>{organization.phone}</p>
-              <p>{organization.website}</p>
+              {organization.address && <p>{organization.address}</p>}
+              {organization.phone && <p>{organization.phone}</p>}
+              {organization.website && <p>{organization.website}</p>}
             </div>
           </div>
         </div>
@@ -73,10 +73,10 @@ export default function OrganizationPage() {
           <h3 className="uppercase mb-2">Socials</h3>
           <div className="flex gap-6 mb-6">
             <div className="flex flex-col gap-2 font-semibold">
-              <p>Facebook</p>
-              <p>Instgram</p>
-              <p>LinkedIn</p>
-              <p>YouTube</p>
+              {organization.facebook && <p>Facebook</p>}
+              {organization.instagram && <p>Instgram</p>}
+              {organization.linkedin && <p>LinkedIn</p>}
+              {organization.youtube && <p>YouTube</p>}
             </div>
             <div className="flex flex-col gap-2">
               {organization.facebook && (

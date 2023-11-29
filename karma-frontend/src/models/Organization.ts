@@ -3,24 +3,53 @@ import { HasIDSchema } from "./Common";
 import { ActivityListSchema } from "./Activity";
 
 export const OrganizationEditSchema = z.object({
-  name: z.string(),
-  email: z.string().email(),
+  name: z.string().min(1, "Name is required"),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Please provide a valid email"),
   phone: z
     .string()
-    .regex(/^[\\+]?[(]?[0-9]{3}[)]?[-\s\\.]?[0-9]{3}[-\s\\.]?[0-9]{4,6}$/),
-  type: z.string(),
-  mission: z.string().optional(),
-  address: z.string().optional(),
+    .min(1, "Phone number is required")
+    .regex(
+      /^[\\+]?[(]?[0-9]{3}[)]?[-\s\\.]?[0-9]{3}[-\s\\.]?[0-9]{4,6}$/,
+      "Please provide a valid phone number"
+    ),
+  type: z
+    .string({ required_error: "Type is required" })
+    .min(1, "Type is required"),
+  mission: z.string().nullish(),
+  address: z.string().nullish(),
   website: z
     .string()
-    .optional()
-    .refine((value) => value?.indexOf(".") !== -1, {
+    .nullish()
+    .refine((value) => !value || value?.indexOf(".") !== -1, {
       message: "Invalid website URL",
     }),
-  facebook: z.string().optional(),
-  instagram: z.string().optional(),
-  youtube: z.string().optional(),
-  linkedin: z.string().optional(),
+  facebook: z
+    .string()
+    .nullish()
+    .refine((value) => !value || value?.indexOf("facebook") !== -1, {
+      message: "Invalid facebook URL",
+    }),
+  instagram: z
+    .string()
+    .nullish()
+    .refine((value) => !value || value?.indexOf("instagram") !== -1, {
+      message: "Invalid instagram URL",
+    }),
+  youtube: z
+    .string()
+    .nullish()
+    .refine((value) => !value || value?.indexOf("youtube") !== -1, {
+      message: "Invalid youtube URL",
+    }),
+  linkedin: z
+    .string()
+    .nullish()
+    .refine((value) => !value || value?.indexOf("linkedin") !== -1, {
+      message: "Invalid linkedin URL",
+    }),
 });
 
 export const OrganizationSchema = OrganizationEditSchema.merge(HasIDSchema);

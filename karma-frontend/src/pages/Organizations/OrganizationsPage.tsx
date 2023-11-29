@@ -1,5 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { getAllOrganizations } from "../../api/organizationApi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  deleteOrganization,
+  getAllOrganizations,
+} from "../../api/organizationApi";
 import { Link } from "react-router-dom";
 import {
   AlertDialog,
@@ -16,6 +19,8 @@ import { Button } from "../../components/ui/Button";
 import PlusIcon from "../../assets/icons/PlusIcon";
 
 export default function OrganizationsPage() {
+  const queryClient = useQueryClient();
+
   const {
     data: organizations,
     isPending,
@@ -25,6 +30,22 @@ export default function OrganizationsPage() {
     queryKey: ["organizationList"],
     queryFn: async () => await getAllOrganizations({}),
   });
+
+  const deleteFeedbackMutation = useMutation({
+    mutationFn: async (params: { id: string }) =>
+      await deleteOrganization({
+        params: {
+          id: params.id!,
+        },
+      }),
+    onSuccess: async () =>
+      await queryClient.invalidateQueries({
+        queryKey: ["organizationList"],
+      }),
+  });
+
+  console.log(deleteFeedbackMutation.status);
+  console.log(deleteFeedbackMutation.error);
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -102,7 +123,15 @@ export default function OrganizationsPage() {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogDelete>Delete</AlertDialogDelete>
+                        <AlertDialogDelete
+                          onClick={async () =>
+                            await deleteFeedbackMutation.mutate({
+                              id: organization.id,
+                            })
+                          }
+                        >
+                          Delete
+                        </AlertDialogDelete>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>

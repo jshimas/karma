@@ -28,7 +28,9 @@ export default function LoginForm() {
       Cookies.set("refreshToken", refreshToken);
       navigate(-1);
     } catch (error) {
+      console.log(error);
       if (error instanceof AxiosError) {
+        console.log(error);
         setError(error);
       }
     } finally {
@@ -40,7 +42,7 @@ export default function LoginForm() {
     <div className="h-full flex items-center justify-center bg-gray-50">
       <div className="max-w-sm w-full space-y-8 mb-10 -translate-y-1/2">
         <div className="flex justify-center">
-          <h2 className="text-3xl  text-slate-900">Log in</h2>
+          <h2 className="text-3xl text-slate-900">Log in</h2>
         </div>
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div>
