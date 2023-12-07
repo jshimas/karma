@@ -6,9 +6,9 @@ VALUES
 -- Insert fake data into organizations
 INSERT INTO organizations (id, name, email, phone, type_id, mission, address, website, facebook, instagram, youtube, linkedin, created_at, updated_at)
 VALUES
-    ('cbe308ea-23b7-4e7a-b07b-39ebfddbd0b7', 'Charity Foundation', 'info@charity.org', '123456789', 1, 'Supporting needy families', '123 Charity St', 'charity.org', 'facebook.com/charity', 'instagram.com/charity', 'youtube.com/charity', 'linkedin.com/company/charity', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('d4f52d2b-753e-4832-b0e2-96c8c836b51b', 'Community Center', 'info@communitycenter.org', '987654321', 2, 'Connecting neighbors', '456 Community Ave', 'communitycenter.org', 'facebook.com/communitycenter', 'instagram.com/communitycenter', 'youtube.com/communitycenter', 'linkedin.com/company/communitycenter', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('7eb9a07e-238e-4137-8f7e-7c6d92d012f5', 'Educational Institute', 'info@eduinst.org', '555123456', 3, 'Empowering future leaders', '789 Edu St', 'eduinst.org', 'facebook.com/eduinst', 'instagram.com/eduinst', 'youtube.com/eduinst', 'linkedin.com/company/eduinst', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('cbe308ea-23b7-4e7a-b07b-39ebfddbd0b7', 'Charity Foundation', 'info@charity.org', '12345678910', 1, 'Supporting needy families', '123 Charity St', 'charity.org', 'facebook.com/charity', 'instagram.com/charity', 'youtube.com/charity', 'linkedin.com/company/charity', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('d4f52d2b-753e-4832-b0e2-96c8c836b51b', 'Community Center', 'info@communitycenter.org', '98765432100', 2, 'Connecting neighbors', '456 Community Ave', 'communitycenter.org', 'facebook.com/communitycenter', 'instagram.com/communitycenter', 'youtube.com/communitycenter', 'linkedin.com/company/communitycenter', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('7eb9a07e-238e-4137-8f7e-7c6d92d012f5', 'Educational Institute', 'info@eduinst.org', '55512345600', 3, 'Empowering future leaders', '789 Edu St', 'eduinst.org', 'facebook.com/eduinst', 'instagram.com/eduinst', 'youtube.com/eduinst', 'linkedin.com/company/eduinst', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Insert fake data into events
 INSERT INTO events (id, organization_id, name, start_date, description, duration, location, geo_location, created_at, updated_at)

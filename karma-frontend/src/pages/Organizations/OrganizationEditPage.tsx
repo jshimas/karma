@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { OrganizationEdit } from "../../models/Organization";
 import { SubmitHandler } from "react-hook-form";
 import { AxiosError } from "axios";
+import SpinnerIcon from "../../assets/icons/SpinnerIcon";
 
 export default function OrganizationEditPage() {
   const [errorEdit, setErrorEdit] = useState<AxiosError | null>(null);
@@ -52,7 +53,7 @@ export default function OrganizationEditPage() {
   };
 
   if (isFetchingActivity) {
-    return <div>Loading...</div>;
+    return <SpinnerIcon />;
   }
 
   return (

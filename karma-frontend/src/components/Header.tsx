@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Header() {
   const [isMenuOpen, setMenuOpen] = useState<boolean>(false);
+  const { user, logout } = useAuth();
 
   return (
     <div className="h-14 flex items-center sm:gap-8 border-b-2 border-teal-700 px-8 justify-between">
@@ -24,24 +26,41 @@ export default function Header() {
           >
             Organizations
           </Link>
-          <button className="transition text-slate-600 hover:text-teal-700">
-            Prizes
-          </button>
         </div>
 
-        <div className="space-x-4 h-2/3 flex justify-center">
-          <Link
-            to={"login"}
-            className="transition-all px-4 border-2 rounded-md border-teal-700 text-teal-700 font-semibold flex items-center hover:bg-teal-50 "
-          >
-            <p className="">Log in</p>
-          </Link>
-          <Link
-            to={"/signup"}
-            className="transition-all px-4 rounded-md bg-teal-700 text-white font-semibold flex items-center hover:bg-teal-800 active:bg-teal-900"
-          >
-            <p className="">Sign up</p>
-          </Link>
+        <div className="space-x-4 h-2/3 flex justify-center items-center">
+          {user?.role === "organizer" && (
+            <Link
+              to={`/organizations/${user?.organizationId}`}
+              className="transition text-slate-600 hover:text-teal-700 mr-4"
+            >
+              My organization
+            </Link>
+          )}
+          {!user ? (
+            <>
+              <Link
+                to={"login"}
+                className="transition-all h-full px-4 border-2 rounded-md border-teal-700 text-teal-700 font-semibold flex items-center hover:bg-teal-50 "
+              >
+                <p className="">Log in</p>
+              </Link>
+              <Link
+                to={"/signup"}
+                className="transition-all h-full px-4 rounded-md bg-teal-700 text-white font-semibold flex items-center hover:bg-teal-800 active:bg-teal-900"
+              >
+                <p className="">Sign up</p>
+              </Link>
+            </>
+          ) : (
+            <Link
+              to={"/"}
+              onClick={logout}
+              className="transition-all h-full px-4 border-2 rounded-md border-teal-700 text-teal-700 font-semibold flex items-center hover:bg-teal-50 "
+            >
+              Logout
+            </Link>
+          )}
         </div>
       </div>
 

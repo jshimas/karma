@@ -1,5 +1,6 @@
 package com.jshimas.karmaapi.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jshimas.karmaapi.entities.Feedback;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,6 +14,7 @@ public record EventViewDTO(
         @NotNull @NotBlank UUID id,
         @NotNull @NotBlank String organizationId,
         @NotNull @NotBlank String name,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
         @NotNull Instant startDate,
         @NotNull @NotBlank String description,
         @NotNull @NotBlank String duration,

@@ -36,7 +36,7 @@ public class OrganizationController {
         return organizationService.findAll();
     }
 
-    @Secured(UserRole.ADMIN)
+//    @Secured(UserRole.ADMIN)
     @PostMapping
     public ResponseEntity<OrganizationNoEventsDTO> createOrganization(@Valid @RequestBody OrganizationEditDTO organizationDTO) {
         OrganizationNoEventsDTO createdOrganization = organizationService.create(organizationDTO);

@@ -5,11 +5,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "../api/authApi";
 import Cookies from "js-cookie";
 import { AxiosError } from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "./ui/Button";
+import { getCurrentUser } from "../api/usersApi";
+import { Role } from "../global";
+import { useAuth } from "../hooks/useAuth";
 
 export default function LoginForm() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<AxiosError | null>(null);
+  const { login: authLogin } = useAuth();
   const navigate = useNavigate();
 
   const {
@@ -26,7 +31,12 @@ export default function LoginForm() {
       const { accessToken: token, refreshToken } = await login({ data });
       Cookies.set("jwt", token);
       Cookies.set("refreshToken", refreshToken);
-      navigate(-1);
+
+      const user = await getCurrentUser({});
+      console.log("User after login", user);
+      authLogin({ ...user, role: user.role.toLowerCase() as Role });
+
+      navigate("/");
     } catch (error) {
       console.log(error);
       if (error instanceof AxiosError) {
@@ -39,12 +49,12 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="h-full flex items-center justify-center bg-gray-50">
-      <div className="max-w-sm w-full space-y-8 mb-10 -translate-y-1/2">
-        <div className="flex justify-center">
+    <div className="h-full flex flex-col items-center justify-center bg-gray-50">
+      <div className="max-w-sm w-full -translate-y-1/2">
+        <div className="flex justify-center mb-10">
           <h2 className="text-3xl text-slate-900">Log in</h2>
         </div>
-        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <form className="space-y-6 mb-8" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label htmlFor="email" className="sr-only">
               Email address
@@ -90,6 +100,13 @@ export default function LoginForm() {
           </button>
           {error && <p className="text-red-500">{error.message}</p>}
         </form>
+
+        <p className="text-slate-600 text-sm text-center">
+          New to Karma?
+          <Link to={"/signup"}>
+            <Button variant={"link"}>Sign up now</Button>
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -17,8 +17,10 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllOrganizations } from "../api/organizationApi";
 import SpinnerIcon from "../assets/icons/SpinnerIcon";
 import { Button } from "./ui/Button";
+import { useAuth } from "../hooks/useAuth";
 
 export default function SignupForm() {
+  const { setUserStatus } = useAuth();
   const [error, setError] = useState<AxiosError | null>(null);
   const navigate = useNavigate();
   const {
@@ -50,6 +52,7 @@ export default function SignupForm() {
             data.role === "organizer" ? data.organizationId : undefined,
         },
       });
+      setUserStatus("idle");
       navigate("/login");
     } catch (error) {
       console.log(error);

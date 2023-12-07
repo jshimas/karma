@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/organizations/{organizationId}/events")
+@RequestMapping("/api/v1/organizations/{organizationId}/activities")
 @RequiredArgsConstructor
 public class EventController {
     private final EventService eventService;

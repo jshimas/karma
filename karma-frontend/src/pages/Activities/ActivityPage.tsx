@@ -24,6 +24,7 @@ import {
   updateFeedback,
 } from "../../api/feedbackApi";
 import { FeedbackEdit } from "../../models/Feedback";
+import SpinnerIcon from "../../assets/icons/SpinnerIcon";
 
 export default function ActivityPage() {
   const [comment, setComment] = useState("");
@@ -99,21 +100,20 @@ export default function ActivityPage() {
   });
 
   if (isPending) {
-    return <div>Loading...</div>;
+    return <SpinnerIcon />;
   }
 
   if (isError) {
     return <div>{error.message}</div>;
   }
 
-  const parseDate = (date: number) => {
-    // console.log(date);
-    const convertedDate = new Date(date * 1000);
+  const parseDate = (date: string) => {
+    const convertedDate = new Date(date);
     return convertedDate.toISOString().split("T")[0];
   };
 
-  const parseTime = (date: number) => {
-    const convertedDate = new Date(date * 1000);
+  const parseTime = (date: string) => {
+    const convertedDate = new Date(date);
     const hours: number = convertedDate.getHours();
     const minutes: number = convertedDate.getMinutes();
     const stringMinutes = `${minutes}`.padStart(2, "0");
@@ -152,71 +152,74 @@ export default function ActivityPage() {
               key={feedback.id}
               className="relative first:border-t-2 py-4 border-b-2"
             >
-              <div className="flex">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <button
-                      disabled={editFeedbackMutation.isPending}
-                      className="text-slate-400 hover:underline text-sm hover:text-teal-700 border-r-2 pr-1"
-                    >
-                      Edit
-                    </button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Update your comment</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Tell the community what you think about the event.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <Textarea
-                      onChange={(event) => setComment(event.target.value)}
-                      placeholder="Type your comment here."
-                      defaultValue={feedback.comment}
-                    />
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={async () =>
-                          await editFeedbackMutation.mutate({
-                            comment,
-                            feedbackId: feedback.id,
-                          })
-                        }
+              {(user?.role === "admin" || user?.id === feedback.userId) && (
+                <div className="flex">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        disabled={editFeedbackMutation.isPending}
+                        className="text-slate-400 hover:underline text-sm hover:text-teal-700 border-r-2 pr-1"
                       >
-                        Update
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <button className="text-slate-400 hover:underline text-sm hover:text-destructive pl-1">
-                      Delete
-                    </button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirm delete</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete your comment?
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogDelete
-                        onClick={async () =>
-                          await deleteFeedbackMutation.mutate({
-                            feedbackId: feedback.id,
-                          })
-                        }
-                      >
+                        Edit
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Update your comment</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tell the community what you think about the event.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <Textarea
+                        onChange={(event) => setComment(event.target.value)}
+                        placeholder="Type your comment here."
+                        defaultValue={feedback.comment}
+                      />
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={async () =>
+                            await editFeedbackMutation.mutate({
+                              comment,
+                              feedbackId: feedback.id,
+                            })
+                          }
+                        >
+                          Update
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button className="text-slate-400 hover:underline text-sm hover:text-destructive pl-1">
                         Delete
-                      </AlertDialogDelete>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm delete</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete your comment?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogDelete
+                          onClick={async () =>
+                            await deleteFeedbackMutation.mutate({
+                              feedbackId: feedback.id,
+                            })
+                          }
+                        >
+                          Delete
+                        </AlertDialogDelete>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              )}
+
               {feedback.userId === user?.id && (
                 <p className="text-sm text-slate-600">(Your comment)</p>
               )}

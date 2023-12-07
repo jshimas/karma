@@ -10,6 +10,8 @@ import com.jshimas.karmaapi.repositories.UserRoleRepository;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.UUID;
+
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class UserMapper {
     @Autowired
@@ -22,6 +24,8 @@ public abstract class UserMapper {
     public abstract User create(UserCreateDTO userCreateDTO, String role);
 
     public abstract UserViewDTO toDTO(User user);
+    @Mapping(source = "organizationId", target = "organizationId")
+    public abstract UserViewDTO toDTO(User user, UUID organizationId);
 
     @Mapping(source = "role", target = "role", qualifiedByName = "stringToRole")
     public abstract void updateEntityFromDTO(UserEditDTO userEditDTO, @MappingTarget User user);

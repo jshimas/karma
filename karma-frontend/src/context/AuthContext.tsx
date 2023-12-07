@@ -11,6 +11,7 @@ type User = {
   lastName: string;
   email: string;
   role: Role;
+  organizationId?: string;
 };
 
 type Status = "idle" | "loading" | "resolved";
@@ -20,6 +21,7 @@ export type AuthContextType = {
   user: User | null;
   login: (user: User) => void;
   logout: () => void;
+  setUserStatus: (status: Status) => void;
 };
 
 const initialContext = {
@@ -27,6 +29,7 @@ const initialContext = {
   user: null,
   login: () => {},
   logout: () => {},
+  setUserStatus: () => {},
 };
 
 export const AuthContext = createContext<AuthContextType>(initialContext);
@@ -49,8 +52,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const jwt = jwtDecode<JwtPayload>(token);
-
-      console.log();
 
       if (
         !user &&
@@ -90,10 +91,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = (user: User) => {
     setUser(user);
+    setStatus("resolved");
   };
 
   const logout = () => {
     setUser(null);
+    setStatus("idle");
+    Cookies.remove("jwt");
+    Cookies.remove("refreshToken");
+  };
+
+  const setUserStatus = (status: Status) => {
+    setStatus(status);
   };
 
   const contextValue: AuthContextType = {
@@ -101,6 +110,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     login,
     logout,
+    setUserStatus,
   };
 
   return (

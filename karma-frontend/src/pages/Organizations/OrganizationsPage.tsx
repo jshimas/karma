@@ -17,9 +17,12 @@ import {
 } from "../../components/ui/Dialog";
 import { Button } from "../../components/ui/Button";
 import PlusIcon from "../../assets/icons/PlusIcon";
+import { useAuth } from "../../hooks/useAuth";
+import SpinnerIcon from "../../assets/icons/SpinnerIcon";
 
 export default function OrganizationsPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const {
     data: organizations,
@@ -44,11 +47,8 @@ export default function OrganizationsPage() {
       }),
   });
 
-  console.log(deleteFeedbackMutation.status);
-  console.log(deleteFeedbackMutation.error);
-
   if (isPending) {
-    return <div>Loading...</div>;
+    return <SpinnerIcon />;
   }
 
   if (isError) {
@@ -75,9 +75,11 @@ export default function OrganizationsPage() {
               <th scope="col" className="px-6 py-3">
                 Phone
               </th>
-              <th scope="col" className="px-6 py-3">
-                Action
-              </th>
+              {user && user.role === "admin" && (
+                <th scope="col" className="px-6 py-3">
+                  Action
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -97,58 +99,62 @@ export default function OrganizationsPage() {
                 <td className="px-6 py-4">{organization.type}</td>
                 <td className="px-6 py-4">{organization.email}</td>
                 <td className="px-6 py-4">{`${organization.phone}`}</td>
-                <td className="px-6 py-4 text-left">
-                  <Link
-                    to={`/organizations/${organization.id}/edit`}
-                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                  >
-                    Edit
-                  </Link>
+                {user && user.role === "admin" && (
+                  <td className="px-6 py-4 text-left">
+                    <Link
+                      to={`/organizations/${organization.id}/edit`}
+                      className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                    >
+                      Edit
+                    </Link>
 
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <a className="font-medium text-red-600 dark:text-red-500 hover:underline ms-3 cursor-pointer">
-                        Remove
-                      </a>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you absolutely sure you want to delete?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {`This action cannot be undone. This will permanently
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <a className="font-medium text-red-600 dark:text-red-500 hover:underline ms-3 cursor-pointer">
+                          Remove
+                        </a>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Are you absolutely sure you want to delete?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {`This action cannot be undone. This will permanently
                           delete '${organization.name}' organization and remove all the related activities.`}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogDelete
-                          onClick={async () =>
-                            await deleteFeedbackMutation.mutate({
-                              id: organization.id,
-                            })
-                          }
-                        >
-                          Delete
-                        </AlertDialogDelete>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </td>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogDelete
+                            onClick={async () =>
+                              await deleteFeedbackMutation.mutate({
+                                id: organization.id,
+                              })
+                            }
+                          >
+                            Delete
+                          </AlertDialogDelete>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div className="flex justify-end">
-        <Link to={"/organizations/create"}>
-          <Button>
-            <PlusIcon />
-            Create
-          </Button>
-        </Link>
-      </div>
+      {user?.role === "admin" && (
+        <div className="flex justify-end">
+          <Link to={"/organizations/create"}>
+            <Button>
+              <PlusIcon />
+              Create
+            </Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

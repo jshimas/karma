@@ -12,8 +12,6 @@ export default function ProtectedRoute({
 }) {
   const { user, status } = useAuth();
 
-  console.log(user, status);
-
   if (status !== "resolved") {
     <p>Loading user...</p>;
   } else if (!user || (roles && !roles.includes(user.role))) {

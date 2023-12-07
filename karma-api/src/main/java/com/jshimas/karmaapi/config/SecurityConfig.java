@@ -49,6 +49,7 @@ public class SecurityConfig {
 
                 // Public endpoints
                 .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/organizations").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/refresh-token").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
 

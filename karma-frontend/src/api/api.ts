@@ -32,6 +32,8 @@ export default function api<Request, Response, Parameters>({
   return function ({ data, params }) {
     requestSchema.parse(data);
 
+    console.log(data);
+
     const headers: Record<string, string> = {};
 
     const jwt: string | undefined = Cookies.get("jwt");
@@ -49,6 +51,8 @@ export default function api<Request, Response, Parameters>({
         [method === HTTPMethod.GET ? "params" : "data"]: data,
         headers,
       });
+
+      console.log(responseSchema.parse(response.data));
 
       return responseSchema.parse(response.data);
     }

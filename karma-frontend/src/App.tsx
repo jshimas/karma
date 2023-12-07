@@ -29,22 +29,22 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <ActivitiesPage />,
+        element: <OrganizationsPage />,
       },
       {
         path: "/organizations",
         children: [
           {
             index: true,
-            element: (
-              <ProtectedRoute roles={["admin"]}>
-                <OrganizationsPage />
-              </ProtectedRoute>
-            ),
+            element: <OrganizationsPage />,
           },
           {
             path: "/organizations/:organizationId",
-            element: <OrganizationPage />,
+            element: (
+              <ProtectedRoute>
+                <OrganizationPage />
+              </ProtectedRoute>
+            ),
           },
           {
             path: "/organizations/:organizationId/edit",

@@ -35,7 +35,7 @@ public class AuthTokenServiceImpl implements AuthTokenService {
     private final JwtEncoder jwtEncoder;
 
     @Value("${jwt.expiration.access}")
-    private int accessExpirationMs;
+    private long accessExpirationMs;
 
     @Value("${jwt.expiration.refresh}")
     private long refreshExpirationMs;

@@ -1,13 +1,31 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { getOrganization } from "../../api/organizationApi";
 import Badge from "../../components/Badge";
-import { getOrganizationActivities } from "../../api/activityApi";
+import { deleteActivity } from "../../api/activityApi";
 import { Button } from "../../components/ui/Button";
 import PlusIcon from "../../assets/icons/PlusIcon";
+import { useAuth } from "../../hooks/useAuth";
+import SpinnerIcon from "../../assets/icons/SpinnerIcon";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+} from "@radix-ui/react-alert-dialog";
+import {
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogDelete,
+} from "../../components/ui/Dialog";
 
 export default function OrganizationPage() {
   const { organizationId } = useParams();
+  const { user } = useAuth();
+
+  const queryClient = useQueryClient();
 
   const {
     data: organization,
@@ -20,29 +38,26 @@ export default function OrganizationPage() {
       await getOrganization({ params: { id: organizationId! } }),
   });
 
-  const {
-    data: activities,
-    isPending: isPendingActivities,
-    isError: isErrorActivities,
-    error: errorActivities,
-  } = useQuery({
-    queryKey: ["activities", "list", organizationId],
-    queryFn: async () =>
-      await getOrganizationActivities({
-        params: { organizationId: organizationId! },
+  const deleteActivityMutation = useMutation({
+    mutationFn: async (params: { activityId: string }) =>
+      await deleteActivity({
+        params: {
+          organizationId: organizationId!,
+          activityId: params.activityId!,
+        },
+      }),
+    onSuccess: async () =>
+      await queryClient.invalidateQueries({
+        queryKey: ["organization", "detail", organizationId],
       }),
   });
 
-  if (isPending || isPendingActivities) {
-    return <div>Loading...</div>;
+  if (isPending) {
+    return <SpinnerIcon />;
   }
 
   if (isError) {
     return <div>{error.message}</div>;
-  }
-
-  if (isErrorActivities) {
-    return <div>{errorActivities.message}</div>;
   }
 
   return (
@@ -108,8 +123,8 @@ export default function OrganizationPage() {
           Organization's events
         </h2>
         <ul className="mb-8">
-          {activities?.map((activity) => {
-            const date = new Date(activity.startDate * 1000);
+          {organization.events?.map((activity) => {
+            const date = new Date(activity.startDate);
             const formatedDate = date.toISOString().split("T")[0];
 
             return (
@@ -117,6 +132,47 @@ export default function OrganizationPage() {
                 key={activity.id}
                 className="group/item transition-all py-4 border-b-2"
               >
+                {(user?.role === "admin" ||
+                  user?.organizationId === activity.organizationId) && (
+                  <div className="flex">
+                    <Link
+                      to={`/organizations/${organizationId}/activities/${activity.id}/edit`}
+                      className="text-slate-400 hover:underline text-sm hover:text-teal-700 border-r-2 pr-1"
+                    >
+                      Edit
+                    </Link>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button className="text-slate-400 hover:underline text-sm hover:text-destructive pl-1">
+                          Delete
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Confirm delete</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete this activity? All
+                            the data related to it will be permenantly deleted
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogDelete
+                            onClick={async () =>
+                              await deleteActivityMutation.mutate({
+                                activityId: activity.id,
+                              })
+                            }
+                          >
+                            Delete
+                          </AlertDialogDelete>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                )}
+
                 <Link
                   to={`/organizations/${organization.id}/activities/${activity.id}`}
                 >
@@ -136,14 +192,16 @@ export default function OrganizationPage() {
             );
           })}
         </ul>
-        <div>
-          <Link to={`/organizations/${organization.id}/activities/create`}>
-            <Button>
-              <PlusIcon />
-              Create event
-            </Button>
-          </Link>
-        </div>
+        {user?.organizationId === organizationId && (
+          <div>
+            <Link to={`/organizations/${organization.id}/activities/create`}>
+              <Button>
+                <PlusIcon />
+                Create event
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ export const UserSchema = UserUpdateSchema.merge(
   z.object({
     id: z.string(),
     email: z.string().email(),
+    organizationId: z.string().uuid().optional(),
   })
 );
 

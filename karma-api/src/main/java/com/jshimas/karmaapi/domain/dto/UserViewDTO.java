@@ -11,6 +11,7 @@ public record UserViewDTO(
         @NotNull @NotBlank String firstName,
         @NotNull @NotBlank String lastName,
         @NotNull @NotBlank @Email String email,
-        @NotNull @NotBlank String role
+        @NotNull @NotBlank String role,
+        UUID organizationId
 ) {
 }
