@@ -50,7 +50,7 @@ export default function LoginForm() {
 
   return (
     <div className="h-full flex flex-col items-center justify-center bg-gray-50">
-      <div className="max-w-sm w-full -translate-y-1/2">
+      <div className="max-w-sm w-full">
         <div className="flex justify-center mb-10">
           <h2 className="text-3xl text-slate-900">Log in</h2>
         </div>
@@ -98,7 +98,7 @@ export default function LoginForm() {
               "Log in"
             )}
           </button>
-          {error && <p className="text-red-500">{error.message}</p>}
+          {error && <p className="text-red-500">Wrong credentials!</p>}
         </form>
 
         <p className="text-slate-600 text-sm text-center">

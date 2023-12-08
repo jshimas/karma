@@ -32,6 +32,10 @@ const router = createBrowserRouter([
         element: <OrganizationsPage />,
       },
       {
+        path: "/activities",
+        element: <ActivitiesPage />,
+      },
+      {
         path: "/organizations",
         children: [
           {

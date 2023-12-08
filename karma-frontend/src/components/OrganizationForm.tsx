@@ -67,6 +67,19 @@ export default function OrganizationForm({
               </p>
             )}
           </div>
+
+          <div>
+            <label htmlFor="Address" className="sr-only">
+              Address
+            </label>
+            <Input {...register("address")} placeholder="Address" />
+            {errors.address && (
+              <p className="text-destructive text-sm my-1">
+                {errors.address?.message}
+              </p>
+            )}
+          </div>
+
           <div>
             <label htmlFor="Phone" className="sr-only">
               Phone
@@ -78,6 +91,19 @@ export default function OrganizationForm({
               </p>
             )}
           </div>
+
+          <div>
+            <label htmlFor="Website" className="sr-only">
+              Website
+            </label>
+            <Input {...register("website")} placeholder="Website" />
+            {errors.website && (
+              <p className="text-destructive text-sm my-1">
+                {errors.website?.message}
+              </p>
+            )}
+          </div>
+
           <div>
             <Controller
               control={control}
@@ -167,7 +193,7 @@ export default function OrganizationForm({
         </div>
       </div>
       <div className="flex items-center w-full justify-end gap-2">
-        <Button variant="outline" onClick={() => navigate(-1)}>
+        <Button variant="outline" onClick={() => navigate(`/organizations`)}>
           Cancel
         </Button>
         <Button disabled={isSubmitting} type="submit">

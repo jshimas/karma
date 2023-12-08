@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/Button";
 import PlusIcon from "../../assets/icons/PlusIcon";
 import { useAuth } from "../../hooks/useAuth";
 import SpinnerIcon from "../../assets/icons/SpinnerIcon";
+
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -14,12 +15,11 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogCancel,
-} from "@radix-ui/react-alert-dialog";
-import {
   AlertDialogHeader,
   AlertDialogFooter,
   AlertDialogDelete,
 } from "../../components/ui/Dialog";
+import PenIcon from "../../assets/icons/PenIcon";
 
 export default function OrganizationPage() {
   const { organizationId } = useParams();
@@ -63,7 +63,14 @@ export default function OrganizationPage() {
   return (
     <div className="mx-6 my-12 md:mx-12 w-4/5 xl:w-1/2 flex flex-col gap-14 sm:flex-row text-slate-800">
       <div className="basis-1/2 md:border-r-2 pr-4">
-        <h2 className="text-3xl font-semibold">{organization.name}</h2>
+        <div className="flex gap-3 items-center">
+          <h2 className="text-3xl font-semibold">{organization.name}</h2>
+          {user?.organizationId === organizationId && (
+            <Link to={`/organizations/${organizationId}/edit`}>
+              <PenIcon className="text-slate-600 w-5 h-5" />
+            </Link>
+          )}
+        </div>
         <p className="mb-1">{organization.mission}</p>
         <div className="mb-8">
           <Badge>{organization.type}</Badge>
@@ -134,7 +141,7 @@ export default function OrganizationPage() {
               >
                 {(user?.role === "admin" ||
                   user?.organizationId === activity.organizationId) && (
-                  <div className="flex">
+                  <div>
                     <Link
                       to={`/organizations/${organizationId}/activities/${activity.id}/edit`}
                       className="text-slate-400 hover:underline text-sm hover:text-teal-700 border-r-2 pr-1"

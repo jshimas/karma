@@ -32,7 +32,7 @@ export default function ActivityEditPage() {
       await updateActivity({
         data: {
           ...activityEdit,
-          startDate: activityEdit.startDate + "T00:00:00Z",
+          startDate: activityEdit.startDate + `T${activityEdit.startTime}:00Z`,
         },
         params: { organizationId: organizationId!, activityId: activityId! },
       }),

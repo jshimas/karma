@@ -19,7 +19,7 @@ export default function ActivityCreatePage() {
       const activity = await createActivity({
         data: {
           ...data,
-          startDate: data.startDate + "T00:00:00Z",
+          startDate: data.startDate + `T${data.startTime}:00Z`,
         },
         params: { organizationId: organizationId! },
       });

@@ -25,6 +25,7 @@ import {
 } from "../../api/feedbackApi";
 import { FeedbackEdit } from "../../models/Feedback";
 import SpinnerIcon from "../../assets/icons/SpinnerIcon";
+import { parseDate, parseTime } from "../../lib/utils";
 
 export default function ActivityPage() {
   const [comment, setComment] = useState("");
@@ -107,19 +108,6 @@ export default function ActivityPage() {
     return <div>{error.message}</div>;
   }
 
-  const parseDate = (date: string) => {
-    const convertedDate = new Date(date);
-    return convertedDate.toISOString().split("T")[0];
-  };
-
-  const parseTime = (date: string) => {
-    const convertedDate = new Date(date);
-    const hours: number = convertedDate.getHours();
-    const minutes: number = convertedDate.getMinutes();
-    const stringMinutes = `${minutes}`.padStart(2, "0");
-    return `${hours}:${stringMinutes}`;
-  };
-
   return (
     <div className="mx-6 my-12 md:mx-12 w-4/5 xl:w-1/2 flex flex-col gap-14 sm:flex-row text-slate-800">
       <div className="basis-1/2 md:border-r-2 pr-4">
@@ -134,7 +122,7 @@ export default function ActivityPage() {
             <p>Location:</p>
           </div>
           <div className="flex flex-col gap-2">
-            <p>~{activity.duration}</p>
+            <p>{activity.duration}</p>
             <p>{activity.location}</p>
           </div>
         </div>

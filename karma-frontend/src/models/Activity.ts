@@ -15,6 +15,13 @@ export const ActivityEditSchema = z.object({
       (date) => new Date(date) > new Date(),
       "Past dates are not allowed!"
     ),
+  startTime: z
+    .string()
+    .regex(
+      /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/,
+      "Invalid format. Valid is HH:MM"
+    )
+    .nullish(),
   description: z.string().min(1, "Description is required"),
   duration: z.string().min(1, "Please describe the expected duration."),
   location: z.string().min(1, "Please provivide an address."),
@@ -24,7 +31,7 @@ export const ActivityEditSchema = z.object({
 export const ActivitySchema = ActivityEditSchema.merge(
   z.object({
     id: z.string(),
-    startDate: z.string().transform((date) => date.split("T")[0]),
+    startDate: z.string(),
     organizationId: z.string(),
   })
 );

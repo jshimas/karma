@@ -5,7 +5,8 @@ import { Input } from "../components/ui/Input";
 import { Textarea } from "../components/ui/TextArea";
 import { Button } from "../components/ui/Button";
 import SpinnerIcon from "../assets/icons/SpinnerIcon";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { parseDate, parseTime } from "../lib/utils";
 
 interface ActivityFormProps {
   onSubmit: SubmitHandler<ActivityEdit>;
@@ -24,10 +25,15 @@ export default function ActivityForm({
     formState: { errors },
   } = useForm<ActivityEdit>({
     resolver: zodResolver(ActivityEditSchema),
-    defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      startDate: defaultValues ? parseDate(defaultValues.startDate) : "",
+      startTime: defaultValues ? parseTime(defaultValues.startDate) : "",
+    },
   });
 
   const navigate = useNavigate();
+  const { organizationId } = useParams();
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -43,6 +49,7 @@ export default function ActivityForm({
             </p>
           )}
         </div>
+
         <div>
           <label htmlFor="startDate" className="sr-only">
             Start Date
@@ -55,6 +62,18 @@ export default function ActivityForm({
           {errors.startDate && (
             <p className="text-destructive text-sm my-1">
               {errors.startDate?.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="startTime" className="sr-only">
+            Start Time
+          </label>
+          <Input {...register("startTime")} placeholder="Enter time (hh:mm)" />
+          {errors.startTime && (
+            <p className="text-destructive text-sm my-1">
+              {errors.startTime?.message}
             </p>
           )}
         </div>
@@ -97,7 +116,10 @@ export default function ActivityForm({
         </div>
       </div>
       <div className="flex items-center w-full justify-end gap-2 mt-4">
-        <Button variant="outline" onClick={() => navigate(-1)}>
+        <Button
+          variant="outline"
+          onClick={() => navigate(`/organizations/${organizationId}`)}
+        >
           Cancel
         </Button>
         <Button disabled={isSubmitting} type="submit">
