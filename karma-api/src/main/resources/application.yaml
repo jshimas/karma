@@ -9,6 +9,13 @@ spring:
     database: postgresql
   flyway:
     enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 322488238877-9r05t6n4fi1suc1ho7bl4jl71v163rg4.apps.googleusercontent.com
+            client-secret: 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
 
 jwt:
   secret:

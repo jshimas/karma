@@ -4,7 +4,7 @@ import com.jshimas.karmaapi.domain.dto.EventEditDTO;
 import com.jshimas.karmaapi.domain.dto.EventNoFeedbackDTO;
 import com.jshimas.karmaapi.domain.dto.EventViewDTO;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
-import com.jshimas.karmaapi.domain.exceptions.UnauthorizedAccessException;
+import com.jshimas.karmaapi.domain.exceptions.ForbiddenAccessException;
 import com.jshimas.karmaapi.domain.mappers.EventMapper;
 import com.jshimas.karmaapi.entities.Event;
 import com.jshimas.karmaapi.entities.Organization;
@@ -36,7 +36,7 @@ public class EventServiceImpl implements EventService {
                 .anyMatch(organizer -> organizer.getUser().getId().equals(authService.extractId(token)));
 
         if (!userIsOrganizer) {
-            throw new UnauthorizedAccessException();
+            throw new ForbiddenAccessException();
         }
 
         Event createdEvent = eventRepository.save(
@@ -77,7 +77,7 @@ public class EventServiceImpl implements EventService {
                 .anyMatch(organizer -> organizer.getUser().getId().equals(authService.extractId(token)));
 
         if (!userIsOrganizer && !authService.isAdmin(token)) {
-            throw new UnauthorizedAccessException();
+            throw new ForbiddenAccessException();
         }
 
         eventRepository.delete(entity);
@@ -91,7 +91,7 @@ public class EventServiceImpl implements EventService {
                 .anyMatch(organizer -> organizer.getUser().getId().equals(authService.extractId(token)));
 
         if (!userIsOrganizer) {
-            throw new UnauthorizedAccessException();
+            throw new ForbiddenAccessException();
         }
 
         eventMapper.updateEntityFromDTO(eventDTO, existantEvent);

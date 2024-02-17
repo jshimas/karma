@@ -4,17 +4,13 @@ import com.jshimas.karmaapi.domain.dto.OrganizationEditDTO;
 import com.jshimas.karmaapi.domain.dto.OrganizationNoEventsDTO;
 import com.jshimas.karmaapi.domain.dto.OrganizationViewDTO;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
-import com.jshimas.karmaapi.domain.exceptions.UnauthorizedAccessException;
+import com.jshimas.karmaapi.domain.exceptions.ForbiddenAccessException;
 import com.jshimas.karmaapi.domain.mappers.OrganizationMapper;
 import com.jshimas.karmaapi.entities.Organization;
 import com.jshimas.karmaapi.repositories.OrganizationRepository;
-import com.jshimas.karmaapi.repositories.UserRepository;
 import com.jshimas.karmaapi.services.AuthService;
 import com.jshimas.karmaapi.services.OrganizationService;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -75,7 +71,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 .anyMatch(organizer -> organizer.getUser().getId().equals(authService.extractId(token)));
 
         if (!userIsOrganizer && !authService.isAdmin(token)) {
-            throw new UnauthorizedAccessException();
+            throw new ForbiddenAccessException();
         }
 
         organizationMapper.updateEntityFromDTO(organizationDTO, existingOrganization);

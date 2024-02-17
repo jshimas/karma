@@ -60,6 +60,7 @@ export default function ActivityEditPage() {
 
   return (
     <div className="w-4/5 lg:w-2/3 text-slate-800 m-12">
+      <h1 className="text-xl mb-6">Fill in Activity details</h1>
       <ActivityForm
         onSubmit={onSubmit}
         isSubmitting={editActivityMutation.isPending}

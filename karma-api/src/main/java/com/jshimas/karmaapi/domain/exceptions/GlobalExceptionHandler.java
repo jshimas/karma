@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -36,10 +36,10 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler(UnauthorizedAccessException.class)
+    @ExceptionHandler(ForbiddenAccessException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<ErrorResponse> handleUnauthorizedAccessException(
-            UnauthorizedAccessException ex, WebRequest request) {
+            ForbiddenAccessException ex, WebRequest request) {
         return buildErrorResponse(ex, HttpStatus.FORBIDDEN, request);
     }
 
@@ -52,6 +52,13 @@ public class GlobalExceptionHandler {
                 "User does not have the permission to perform this action.",
                 HttpStatus.FORBIDDEN,
                 request);
+    }
+
+    @ExceptionHandler(UnauthorizedGoogleAccessException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedGoogleAccessException (
+            UnauthorizedGoogleAccessException ex, WebRequest request) {
+        return buildErrorResponse(ex, HttpStatus.UNAUTHORIZED, request);
     }
 
     @ExceptionHandler(ValidationException.class)
@@ -103,9 +110,6 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, request);
     }
 
-
-
-
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorResponse> handleAllUncaughtException(
@@ -117,6 +121,19 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(
                 exception,
                 "Unknown error occurred",
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                request
+        );
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(
+            Exception exception,
+            WebRequest request){
+
+        return buildErrorResponse(
+                exception,
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 request
         );

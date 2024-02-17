@@ -3,7 +3,7 @@ package com.jshimas.karmaapi.services.impl;
 import com.jshimas.karmaapi.domain.dto.FeedbackEditDTO;
 import com.jshimas.karmaapi.domain.dto.FeedbackViewDTO;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
-import com.jshimas.karmaapi.domain.exceptions.UnauthorizedAccessException;
+import com.jshimas.karmaapi.domain.exceptions.ForbiddenAccessException;
 import com.jshimas.karmaapi.domain.mappers.FeedbackMapper;
 import com.jshimas.karmaapi.entities.Event;
 import com.jshimas.karmaapi.entities.Feedback;
@@ -75,7 +75,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         boolean userIsAuthor = feedback.getUser().getId().equals(authService.extractId(token));
 
         if (!userIsAuthor && authService.isAdmin(token)) {
-            throw new UnauthorizedAccessException();
+            throw new ForbiddenAccessException();
         }
 
         feedbackRepository.delete(feedback);
@@ -89,7 +89,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         boolean userIsAuthor = feedback.getUser().getId().equals(authService.extractId(token));
 
         if (!userIsAuthor) {
-            throw new UnauthorizedAccessException();
+            throw new ForbiddenAccessException();
         }
 
         feedbackMapper.updateEntityFromDTO(feedbackDTO, feedback);

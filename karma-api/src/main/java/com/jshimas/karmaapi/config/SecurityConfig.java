@@ -30,7 +30,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.Arrays;
 import java.util.List;
 
 @EnableWebSecurity
@@ -51,7 +50,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/organizations").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/refresh-token").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll() // user sign-up
+                .requestMatchers(HttpMethod.GET, "/api/v1/oauth2/google/url").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/oauth2/google/me").permitAll()
 
                 // Private endpoints
                 .anyRequest().authenticated());
@@ -61,6 +62,9 @@ public class SecurityConfig {
         http.oauth2ResourceServer(configurer ->
                 configurer.jwt(jwtConfigurer ->
                         jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+
+//        http.oauth2Login(oauth -> oauth.authorizationEndpoint(endpoint -> endpoint.baseUri(
+//                        "/api/v1/oauth2/authorize")));
 
         // Disable CSRF
         http.csrf(AbstractHttpConfigurer::disable);

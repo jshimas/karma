@@ -1,10 +1,8 @@
 package com.jshimas.karmaapi.controllers;
 
-import com.jshimas.karmaapi.domain.dto.AccessTokenResponse;
-import com.jshimas.karmaapi.domain.dto.AuthRequest;
-import com.jshimas.karmaapi.domain.dto.LoginResponseTokens;
-import com.jshimas.karmaapi.domain.dto.RefreshTokenRequest;
+import com.jshimas.karmaapi.domain.dto.*;
 import com.jshimas.karmaapi.services.AuthService;
+import com.jshimas.karmaapi.services.GoogleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -20,9 +18,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1")
 public class AuthController {
     private final AuthService authService;
+    private final GoogleService googleService;
 
     @CrossOrigin
-    @PostMapping("/login")
+    @PostMapping("/login/email")
     public ResponseEntity<LoginResponseTokens>login(@Valid @RequestBody AuthRequest authRequest) {
         try {
             LoginResponseTokens tokens = authService.login(authRequest);
@@ -45,5 +44,16 @@ public class AuthController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logoutUser(@AuthenticationPrincipal Jwt currentUserJwt) {
         authService.logout(currentUserJwt);
+    }
+
+    @GetMapping("/oauth2/google/me")
+    public ResponseEntity<GoogleAccountData> exchangeOAuthCodeForUserData(@RequestParam("code") String code) {
+        return ResponseEntity.ok(googleService.getAccountData(code));
+    }
+
+    @GetMapping("/oauth2/google/url")
+    public ResponseEntity<OAuth2RedirectUrl> oauthUrl() {
+        String authUrl = googleService.generateAuthorizationCodeRequestUrl();
+        return ResponseEntity.ok(new OAuth2RedirectUrl(authUrl));
     }
 }
