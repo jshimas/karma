@@ -1,7 +1,9 @@
 package com.jshimas.karmaapi;
 
+import com.jshimas.karmaapi.entities.AccountType;
 import com.jshimas.karmaapi.entities.User;
 import com.jshimas.karmaapi.entities.UserRole;
+import com.jshimas.karmaapi.repositories.AccountTypeRepository;
 import com.jshimas.karmaapi.repositories.UserRepository;
 import com.jshimas.karmaapi.repositories.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +19,17 @@ public class UsersInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
+    private final AccountTypeRepository accountTypeRepository;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         if (!userRepository.existsByEmail("test.admin@karma.com")) {
             User user = User.builder()
                     .email("test.admin@karma.com")
                     .role(userRoleRepository.findByRoleIgnoreCase(UserRole.ADMIN).get())
                     .firstName("test")
                     .lastName("admin")
+                    .accountType(accountTypeRepository.findByTypeIgnoreCase(AccountType.EMAIL).get())
                     .password(passwordEncoder.encode("testadmin")).build();
 
             userRepository.save(user);
@@ -37,6 +41,7 @@ public class UsersInitializer implements CommandLineRunner {
                     .role(userRoleRepository.findByRoleIgnoreCase(UserRole.VOLUNTEER).get())
                     .firstName("test")
                     .lastName("volunteer")
+                    .accountType(accountTypeRepository.findByTypeIgnoreCase(AccountType.EMAIL).get())
                     .password(passwordEncoder.encode("testvolunteer")).build();
 
             userRepository.save(user);

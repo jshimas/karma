@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,8 +27,11 @@ public class User {
     @NotNull @NotBlank private String firstName;
     @NotNull @NotBlank private String lastName;
     @NotNull @NotBlank @Email @Column(unique = true) private String email;
-    @NotNull @NotBlank private String password;
     @NotNull @ManyToOne @JoinColumn(name = "role_id") private UserRole role;
+    @NotNull @ManyToOne @JoinColumn(name = "account_type_id") private AccountType accountType;
+    private String imageUrl;
+    @Size(min = 6, message = "Password must be at least 6 characters long")
+    private String password;
     @OneToMany(mappedBy = "user") private List<Feedback> feedbacks;
 
     @CreationTimestamp private Timestamp createdAt;

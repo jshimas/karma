@@ -3,7 +3,7 @@ import { Input } from "./ui/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserCreate, UserCreateSchema } from "../models/Users";
 import { createUser } from "../api/usersApi";
 import {
@@ -18,6 +18,7 @@ import { getAllOrganizations } from "../api/organizationApi";
 import SpinnerIcon from "../assets/icons/SpinnerIcon";
 import { Button } from "./ui/Button";
 import { useAuth } from "../hooks/useAuth";
+import { getGoogleSignupRedirectUrl } from "../api/authApi";
 
 export default function SignupForm() {
   const { setUserStatus } = useAuth();
@@ -43,6 +44,16 @@ export default function SignupForm() {
     queryFn: async () => await getAllOrganizations({}),
   });
 
+  const {
+    data: redirectUrl,
+    isPending: isPendingGoogle,
+    isError: isErrorGoogle,
+    error: errorFetchGoogleUrl,
+  } = useQuery({
+    queryKey: ["googleRedirectUrl"],
+    queryFn: async () => await getGoogleSignupRedirectUrl({}),
+  });
+
   const onSubmit: SubmitHandler<UserCreate> = async (data) => {
     try {
       await createUser({
@@ -63,90 +74,86 @@ export default function SignupForm() {
     }
   };
 
-  if (isPending) {
+  const openGoogleAuthorizationWindow = () => {
+    if (redirectUrl) {
+      window.location.href = redirectUrl.redirectUrl;
+    }
+  };
+
+  if (isPending || isPendingGoogle) {
     return <SpinnerIcon />;
   }
 
-  if (isError) {
-    return <p>{errorFetchOrganizations?.message}</p>;
+  if (isError || isErrorGoogle) {
+    return (
+      <p>{errorFetchOrganizations?.message || errorFetchGoogleUrl?.message}</p>
+    );
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="w-80 flex flex-col gap-4"
-    >
-      <div>
-        <label htmlFor="firstName" className="sr-only">
-          First name
-        </label>
-        <Input {...register("firstName")} placeholder="First name" />
-        {errors.firstName && (
-          <p className="text-destructive text-sm my-1">
-            {errors.firstName?.message}
-          </p>
-        )}
-      </div>
-      <div>
-        <label htmlFor="lastName" className="sr-only">
-          Last name
-        </label>
-        <Input {...register("lastName")} placeholder="Last name" />
-        {errors.lastName && (
-          <p className="text-destructive text-sm my-1">
-            {errors.lastName?.message}
-          </p>
-        )}
-      </div>
-      <div>
-        <label htmlFor="email" className="sr-only">
-          Email
-        </label>
-        <Input {...register("email")} placeholder="Email" />
-        {errors.email && (
-          <p className="text-destructive text-sm my-1">
-            {errors.email?.message}
-          </p>
-        )}
-      </div>
-      <div>
-        <Controller
-          control={control}
-          name="role"
-          render={({ field }) => (
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select account role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="volunteer">Volunteer</SelectItem>
-                <SelectItem value="organizer">Organizator</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
+    <form onSubmit={handleSubmit(onSubmit)} className="w-80 flex flex-col">
+      <Button
+        type="button"
+        variant={"outline"}
+        className="h-14 mb-2"
+        onClick={() => openGoogleAuthorizationWindow()}
+      >
+        <img
+          className="h-10 mr-1"
+          src="src\assets\google-icon.svg"
+          alt="google icon"
         />
-        {errors.role && (
-          <p className="text-destructive text-sm my-1">
-            {errors.role?.message}
-          </p>
-        )}
+        <p className="font-semibold">Continue with Google</p>
+      </Button>
+      <div className="mt-4 relative text-center after:content-['or'] text-slate-800 after:bg-slate-50 after:px-3 after:relative after:bottom-4">
+        <div className="border-t-2 "></div>
       </div>
-      {watch("role") === "organizer" && (
+      <div className="flex flex-col gap-4">
+        <div>
+          <label htmlFor="firstName" className="sr-only">
+            First name
+          </label>
+          <Input {...register("firstName")} placeholder="First name" />
+          {errors.firstName && (
+            <p className="text-destructive text-sm my-1">
+              {errors.firstName?.message}
+            </p>
+          )}
+        </div>
+        <div>
+          <label htmlFor="lastName" className="sr-only">
+            Last name
+          </label>
+          <Input {...register("lastName")} placeholder="Last name" />
+          {errors.lastName && (
+            <p className="text-destructive text-sm my-1">
+              {errors.lastName?.message}
+            </p>
+          )}
+        </div>
+        <div>
+          <label htmlFor="email" className="sr-only">
+            Email
+          </label>
+          <Input {...register("email")} placeholder="Email" />
+          {errors.email && (
+            <p className="text-destructive text-sm my-1">
+              {errors.email?.message}
+            </p>
+          )}
+        </div>
         <div>
           <Controller
             control={control}
-            name="organizationId"
+            name="role"
             render={({ field }) => (
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select organization" />
+                  <SelectValue placeholder="Select account role" />
                 </SelectTrigger>
                 <SelectContent>
-                  {organizations.map((organization) => (
-                    <SelectItem value={organization.id}>
-                      {organization.name}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="volunteer">Volunteer</SelectItem>
+                  <SelectItem value="organizer">Organizator</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -157,43 +164,80 @@ export default function SignupForm() {
             </p>
           )}
         </div>
-      )}
-      <div>
-        <label htmlFor="password" className="sr-only">
-          Password
-        </label>
-        <Input
-          {...register("password")}
-          placeholder="Password"
-          type="password"
-        />
-        {errors.password && (
-          <p className="text-destructive text-sm my-1">
-            {errors.password?.message}
-          </p>
+        {watch("role") === "organizer" && (
+          <div>
+            <Controller
+              control={control}
+              name="organizationId"
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select organization" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {organizations.map((organization) => (
+                      <SelectItem value={organization.id}>
+                        {organization.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.role && (
+              <p className="text-destructive text-sm my-1">
+                {errors.role?.message}
+              </p>
+            )}
+          </div>
+        )}
+        <div>
+          <label htmlFor="password" className="sr-only">
+            Password
+          </label>
+          <Input
+            {...register("password")}
+            placeholder="Password"
+            type="password"
+          />
+          {errors.password && (
+            <p className="text-destructive text-sm my-1">
+              {errors.password?.message}
+            </p>
+          )}
+        </div>
+        <div>
+          <label htmlFor="passwordConfirm" className="sr-only">
+            Confirm password
+          </label>
+          <Input
+            {...register("passwordConfirm")}
+            placeholder="Confirm password"
+            type="password"
+          />
+          {errors.passwordConfirm && (
+            <p className="text-destructive text-sm my-1">
+              {errors.passwordConfirm?.message}
+            </p>
+          )}
+        </div>
+        <Button disabled={isSubmitting} type="submit">
+          {isSubmitting ? <SpinnerIcon /> : "Sign up"}
+        </Button>
+        {error && (
+          <p className="text-destructive text-sm my-1">{error?.message}</p>
         )}
       </div>
-      <div>
-        <label htmlFor="passwordConfirm" className="sr-only">
-          Confirm password
-        </label>
-        <Input
-          {...register("passwordConfirm")}
-          placeholder="Confirm password"
-          type="password"
-        />
-        {errors.passwordConfirm && (
-          <p className="text-destructive text-sm my-1">
-            {errors.passwordConfirm?.message}
-          </p>
-        )}
-      </div>
-      <Button disabled={isSubmitting} type="submit">
-        {isSubmitting ? <SpinnerIcon /> : "Sign up"}
-      </Button>
-      {error && (
-        <p className="text-destructive text-sm my-1">{error?.message}</p>
-      )}
+
+      <p className="text-slate-600 text-sm mt-2 text-center">
+        Already have an account?
+        <Link to={"/login"}>
+          <Button variant={"link"}>Log in here</Button>
+        </Link>
+      </p>
     </form>
   );
 }

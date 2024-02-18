@@ -5,6 +5,15 @@ CREATE TABLE IF NOT EXISTS user_roles (
     role VARCHAR(50) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS account_types (
+    id SERIAL PRIMARY KEY,
+    type VARCHAR(50) NOT NULL
+);
+
+INSERT INTO account_types (type) VALUES
+    ('EMAIL'),
+    ('GOOGLE');
+
 INSERT INTO user_roles (role) VALUES
     ('VOLUNTEER'),
     ('UNVERIFIED_ORGANIZER'),
@@ -17,10 +26,13 @@ CREATE TABLE IF NOT EXISTS users (
     last_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     role_id INT NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    account_type_id INT NOT NULL,
+    image_url VARCHAR(255),
+    password VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT role_fk FOREIGN KEY (role_id) REFERENCES user_roles (id)
+    CONSTRAINT role_fk FOREIGN KEY (role_id) REFERENCES user_roles (id),
+    CONSTRAINT account_type_fk FOREIGN KEY (account_type_id) REFERENCES account_types (id)
 );
 
 CREATE TABLE IF NOT EXISTS organization_types (

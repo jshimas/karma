@@ -30,16 +30,18 @@ public class GoogleServiceImpl implements GoogleService {
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String googleClientSecret;
 
+
     @Override
-    public String generateAuthorizationCodeRequestUrl() {
+    public String generateAuthorizationCodeRequestUrl(String redirectUri) {
         return new GoogleAuthorizationCodeRequestUrl(
                 googleClientId,
-                "http://localhost:5173/oauth2/callback/google",
+                redirectUri,
                 List.of("email", "profile", "openid")
         ).setAccessType("offline").build();
     }
 
-    private String getAccessToken(String authCode) {
+
+    private String getAccessToken(String authCode, String redirectUri) {
         String token;
         try {
             token = new GoogleAuthorizationCodeTokenRequest(
@@ -48,7 +50,7 @@ public class GoogleServiceImpl implements GoogleService {
                     googleClientId,
                     googleClientSecret,
                     authCode,
-                    "http://localhost:5173/oauth2/callback/google"
+                    redirectUri
             ).execute().getAccessToken();
         } catch (IOException ex) {
             System.out.println(ExceptionUtils.getStackTrace(ex));
@@ -63,8 +65,8 @@ public class GoogleServiceImpl implements GoogleService {
     }
 
     @Override
-    public GoogleAccountData getAccountData(String authCode) {
-        String token = getAccessToken(authCode);
+    public GoogleAccountData getAccountData(String authCode, String redirectUri) {
+        String token = getAccessToken(authCode, redirectUri);
 
         WebClient webClient = WebClient.builder()
                 .baseUrl("https://people.googleapis.com/v1").build();

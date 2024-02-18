@@ -5,10 +5,7 @@ import com.jshimas.karmaapi.domain.dto.UserEditDTO;
 import com.jshimas.karmaapi.domain.dto.UserViewDTO;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
 import com.jshimas.karmaapi.domain.mappers.UserMapper;
-import com.jshimas.karmaapi.entities.Organization;
-import com.jshimas.karmaapi.entities.Organizer;
-import com.jshimas.karmaapi.entities.User;
-import com.jshimas.karmaapi.entities.UserRole;
+import com.jshimas.karmaapi.entities.*;
 import com.jshimas.karmaapi.repositories.OrganizationRepository;
 import com.jshimas.karmaapi.repositories.OrganizerRepository;
 import com.jshimas.karmaapi.repositories.UserRepository;
@@ -22,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -40,41 +38,42 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
-    public UserViewDTO create(UserCreateDTO userCreateDTO) {
-        validateInput(userCreateDTO);
+    public UserViewDTO findByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(User.class, email));
+        return userMapper.toDTO(user);
+    }
 
-        User user = createUser(userCreateDTO);
+    @Override
+    @Transactional
+    public UserViewDTO create(UserCreateDTO userCreateDTO, String accountType) {
+        if (userRepository.findByEmail(userCreateDTO.email()).isPresent()) {
+            throw new ValidationException("User with this email already exists. Try to login instead.");
+        }
+
+        if (accountType.equals(AccountType.EMAIL) &&
+                !userCreateDTO.password().equals(userCreateDTO.passwordConfirm())) {
+            throw new ValidationException("Passwords don't match!");
+        }
+
+        User user = createUser(userCreateDTO, accountType);
 
         User createdUser = userRepository.save(user);
 
-        handleOrganizerRole(userCreateDTO, createdUser);
+//        handleOrganizerRole(userCreateDTO, createdUser);
 
         return userMapper.toDTO(createdUser);
     }
 
-    private void validateInput(UserCreateDTO userCreateDTO) {
-        String role = userCreateDTO.role();
-
-        if (userRepository.findByEmail(userCreateDTO.email()).isPresent()) {
-            throw new ValidationException("User with this email already exists.");
-        }
-
-        if (!userCreateDTO.password().equals(userCreateDTO.passwordConfirm())) {
-            throw new ValidationException("Passwords don't match!");
-        }
-
-        if (role.equalsIgnoreCase(UserRole.ORGANIZER) && userCreateDTO.organizationId() == null) {
-            throw new ValidationException("organizationId is required for the organizer role.");
-        }
-    }
-
-    private User createUser(UserCreateDTO userCreateDTO) {
+    private User createUser(UserCreateDTO userCreateDTO, String accountType) {
         String role = userCreateDTO.role();
         role = role.equalsIgnoreCase(UserRole.ORGANIZER) ? UserRole.UNVERIFIED_ORGANIZER : role;
 
-        User user = userMapper.create(userCreateDTO, role);
-        user.setPassword(passwordEncoder.encode(userCreateDTO.password()));
+        User user = userMapper.create(userCreateDTO, accountType, role);
+
+        if (accountType.equals(AccountType.EMAIL)) {
+            user.setPassword(passwordEncoder.encode(userCreateDTO.password()));
+        }
 
         return user;
     }

@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public interface UserService {
     User findEntity(UUID id);
-    UserViewDTO create(UserCreateDTO userCreateDTO);
+    UserViewDTO findByEmail(String email);
+    UserViewDTO create(UserCreateDTO userCreateDTO, String accountType);
     void update(UUID userId, UserEditDTO userEditDTO);
 }

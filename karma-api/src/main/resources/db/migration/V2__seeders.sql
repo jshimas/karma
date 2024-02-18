@@ -1,7 +1,7 @@
-INSERT INTO users (id, first_name, last_name, email, role_id, password, created_at, updated_at)
+INSERT INTO users (id, first_name, last_name, email, role_id, account_type_id, password, created_at, updated_at)
 VALUES
-    ('d49d2e22-2b6b-4d8c-9f8d-9f24495e1662', 'John', 'Doe', 'volunteer@karma.com', 1, '$2a$10$UJF3uMya1znpMCh.nelM0us9SR0DJuwRp.EhtFGyztkToX1dvtkLu', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('ee6c7f86-2db4-4df2-95f6-6a86bf1c8907', 'Jane', 'Smith', 'admin@karma.com', 4, '$2a$10$12SUCPMO7XmG57RjbNpz0.K85qNbJIzSc7xldEgyf65EOg5oqMDlC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('d49d2e22-2b6b-4d8c-9f8d-9f24495e1662', 'John', 'Doe', 'volunteer@karma.com', 1, 1, '$2a$10$UJF3uMya1znpMCh.nelM0us9SR0DJuwRp.EhtFGyztkToX1dvtkLu', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('ee6c7f86-2db4-4df2-95f6-6a86bf1c8907', 'Jane', 'Smith', 'admin@karma.com', 4, 1, '$2a$10$12SUCPMO7XmG57RjbNpz0.K85qNbJIzSc7xldEgyf65EOg5oqMDlC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Insert fake data into organizations
 INSERT INTO organizations (id, name, email, phone, type_id, mission, address, website, facebook, instagram, youtube, linkedin, created_at, updated_at)
@@ -19,7 +19,6 @@ VALUES
     ('b7f245d2-86f2-4bdf-9d45-81d0eecd7ac3', 'cbe308ea-23b7-4e7a-b07b-39ebfddbd0b7', 'Holiday Toy Drive', '2023-12-10 10:00:00', 'Collecting toys for underprivileged children', '5 hours', 'Shopping Mall', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('7ab4a2b5-ec5b-45ca-923d-e3a78375ddc6', 'd4f52d2b-753e-4832-b0e2-96c8c836b51b', 'Community Potluck', '2023-10-05 17:30:00', 'Share food and stories with neighbors', '2 hours', 'Community Center Hall', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- Insert fake data into feedbacks
 -- Insert fake data into feedbacks
 INSERT INTO feedbacks (id, comment, event_id, user_id)
 VALUES

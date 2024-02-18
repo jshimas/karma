@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import SignupForm from "../../components/SignupForm";
 import Footer from "../../components/Footer";
-import { Button } from "../../components/ui/Button";
 
 export default function SignupPage() {
   return (
@@ -15,14 +14,8 @@ export default function SignupPage() {
         </Link>
       </div>
       <div className="flex-1 flex flex-col items-center justify-center bg-gray-50">
-        <h2 className="text-3xl font-semibold mb-8">Sign up</h2>
+        <h2 className="text-2xl font-semibold mb-4">Sign up</h2>
         <SignupForm />
-        <p className="text-slate-600 text-sm mt-6 text-center">
-          Already have an account?
-          <Link to={"/login"}>
-            <Button variant={"link"}>Log in here</Button>
-          </Link>
-        </p>
       </div>
       <Footer />
     </div>

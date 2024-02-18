@@ -13,20 +13,16 @@ export const LoginResponseSchema = z.object({
   refreshToken: z.string().min(10),
 });
 
-export const UserRegisterSchema = z
-  .object({
-    firstName: z.string(),
-    lastName: z.string(),
-    email: z.string().email(),
-    role: z.string(),
-    organizationId: z.string().optional(),
-    password: z.string(),
-    passwordConfirm: z.string(),
-  })
-  .refine((data) => data.password === data.passwordConfirm, {
-    message: "Passwords do not match",
-    path: ["passwordConfirm"],
-  });
+export const GoogleRedirectUrlResponseSchema = z.object({
+  redirectUrl: z.string().min(1),
+});
+
+export const GoogleProfileResponseSchema = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  email: z.string().email(),
+  imageUrl: z.string(),
+});
 
 export const AccessTokenRequestSchema = z.object({ refreshToken: z.string() });
 

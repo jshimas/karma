@@ -2,7 +2,7 @@ import React, { createContext, useState, ReactNode, useEffect } from "react";
 import { Role } from "../global";
 import Cookies from "js-cookie";
 import { getCurrentUser } from "../api/usersApi";
-import { refreshAccessToken } from "../api/authApi";
+// import { refreshAccessToken } from "../api/authApi";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 
 type User = {
@@ -11,7 +11,7 @@ type User = {
   lastName: string;
   email: string;
   role: Role;
-  organizationId?: string;
+  organizationId?: string | null;
 };
 
 type Status = "idle" | "loading" | "resolved";
@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         !user &&
         jwt &&
         jwt.exp &&
-        jwt.exp > Number(new Date()) &&
+        jwt.exp * 1000 > Number(new Date()) &&
         status === "idle"
       ) {
         setStatus("loading");
@@ -67,21 +67,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } catch (err) {
           console.log(err);
         }
-      } else if (Cookies.get("refreshToken") && status === "idle") {
-        setStatus("loading");
-        try {
-          Cookies.remove("jwt");
-          const { accessToken } = await refreshAccessToken({
-            data: { refreshToken: Cookies.get("refreshToken")! },
-          });
-          Cookies.set("jwt", accessToken);
-          const user = await getCurrentUser({});
-          login({ ...user, role: user.role.toLowerCase() as Role });
-          console.log("refreshed access token", user);
-        } catch (err) {
-          console.log(err);
-        }
+      } else if (jwt && jwt.exp && jwt.exp * 1000 < Number(new Date())) {
+        console.log("Token expired. Please log in again.");
       }
+      // else if (Cookies.get("refreshToken") && status === "idle") {
+      //   setStatus("loading");
+      //   try {
+      //     Cookies.remove("jwt");
+      //     const { accessToken } = await refreshAccessToken({
+      //       data: { refreshToken: Cookies.get("refreshToken")! },
+      //     });
+      //     Cookies.set("jwt", accessToken);
+      //     const user = await getCurrentUser({});
+      //     login({ ...user, role: user.role.toLowerCase() as Role });
+      //     console.log("refreshed access token", user);
+      //   } catch (err) {
+      //     console.log(err);
+      //   }
+      // }
 
       setStatus("resolved");
     };

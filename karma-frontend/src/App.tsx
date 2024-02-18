@@ -13,6 +13,7 @@ import SignupPage from "./pages/Authorization/SignupPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext";
+import SignupGooglePage from "./pages/Authorization/SignupGooglePage";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
   {
     path: "/signup",
     element: <SignupPage />,
+  },
+  {
+    path: "/signup-google",
+    element: <SignupGooglePage />,
   },
   {
     path: "/",

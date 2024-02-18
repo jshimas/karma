@@ -51,8 +51,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/organizations").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/refresh-token").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll() // user sign-up
-                .requestMatchers(HttpMethod.GET, "/api/v1/oauth2/google/url").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/oauth2/google/me").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/oauth2/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/oauth2/**").permitAll()
 
                 // Private endpoints
                 .anyRequest().authenticated());

@@ -3,6 +3,7 @@ package com.jshimas.karmaapi.controllers;
 import com.jshimas.karmaapi.domain.dto.UserCreateDTO;
 import com.jshimas.karmaapi.domain.dto.UserEditDTO;
 import com.jshimas.karmaapi.domain.dto.UserViewDTO;
+import com.jshimas.karmaapi.entities.AccountType;
 import com.jshimas.karmaapi.entities.UserRole;
 import com.jshimas.karmaapi.services.AuthService;
 import com.jshimas.karmaapi.services.UserService;
@@ -33,7 +34,7 @@ public class UserController {
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> createUser(@RequestBody @Valid UserCreateDTO userCreateDTO) {
-        UserViewDTO createdUser = userService.create(userCreateDTO);
+        UserViewDTO createdUser = userService.create(userCreateDTO, AccountType.EMAIL);
 
         URI location = URI.create("/users/" + createdUser.id());
 

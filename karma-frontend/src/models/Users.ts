@@ -41,4 +41,9 @@ export const UserCreateSchema = z
     path: ["passwordConfirm"],
   });
 
+export const GoogleUserCreateSchema = z.object({
+  role: z.string().min(1, "Role is required"),
+});
+
 export type UserCreate = z.infer<typeof UserCreateSchema>;
+export type GoogleUserCreate = z.infer<typeof GoogleUserCreateSchema>;
