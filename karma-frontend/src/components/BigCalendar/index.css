@@ -1,0 +1,42 @@
+@import "react-big-calendar/lib/sass/styles.scss";
+
+.rbc-month-view {
+  border-radius: 1%;
+}
+
+.rbc-off-range {
+  color: #64748b;
+}
+
+.rbc-off-range-bg {
+  background: #f8fafc;
+}
+
+.rbc-month-view .rbc-date-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.rbc-today {
+  background: none;
+}
+
+.rbc-date-cell .rbc-today {
+  background: #3a6a99;
+}
+
+.rbc-header {
+  border-bottom: none;
+}
+
+.rbc-event-content {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.rbc-event {
+  background: none !important;
+  background-color: none !important;
+}
