@@ -351,11 +351,13 @@ export default function UserForm({
       </div>
 
       <div className="flex flex-1 justify-end space-x-2">
-        <Button onClick={onCancel} variant="outline">
-          Cancel
-        </Button>
+        {!isCreating && (
+          <Button onClick={onCancel} variant="outline">
+            Cancel
+          </Button>
+        )}
         <Button type="submit" disabled={isSubmitting}>
-          {isCreating ? "Create" : "Save"}
+          {isCreating ? "Register" : "Save"}
         </Button>
       </div>
     </form>
