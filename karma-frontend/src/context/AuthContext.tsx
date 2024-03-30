@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import { getCurrentUser } from "../api/usersApi";
 // import { refreshAccessToken } from "../api/authApi";
 import { jwtDecode, JwtPayload } from "jwt-decode";
+import { UserLocation } from "../models/Users";
 
 type User = {
   id: string;
@@ -12,6 +13,7 @@ type User = {
   email: string;
   role: Role;
   organizationId?: string | null;
+  geoLocations?: UserLocation[];
 };
 
 type Status = "idle" | "loading" | "resolved";

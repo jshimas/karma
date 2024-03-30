@@ -32,7 +32,6 @@ export default function ActivityEditPage() {
       await updateActivity({
         data: {
           ...activityEdit,
-          startDate: activityEdit.startDate + `T${activityEdit.startTime}:00Z`,
         },
         params: { organizationId: organizationId!, activityId: activityId! },
       }),
@@ -59,7 +58,7 @@ export default function ActivityEditPage() {
   }
 
   return (
-    <div className="w-4/5 lg:w-2/3 text-slate-800 m-12">
+    <div className="w-4/5 text-slate-800 my-24 flex flex-col items-center">
       <h1 className="text-xl mb-6">Fill in Activity details</h1>
       <ActivityForm
         onSubmit={onSubmit}

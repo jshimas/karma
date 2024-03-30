@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface FeedbackService {
-    FeedbackViewDTO create(FeedbackEditDTO feedbackDTO, UUID eventId, UUID organizationId, UUID userId);
-    FeedbackViewDTO findFeedback(UUID feedbackId, UUID eventId, UUID organizationId);
-    Feedback findEntity(UUID feedbackId, UUID eventId, UUID organizationId);
-    List<FeedbackViewDTO> findAllOrganizationEventFeedbacks(UUID eventId, UUID organizationId);
-    void delete(UUID feedbackId, UUID eventId, UUID organizationId, Jwt token);
-    FeedbackViewDTO update(UUID feedbackId, UUID eventId, UUID organizationId, FeedbackEditDTO feedbackDTO, Jwt token);
+    FeedbackViewDTO create(FeedbackEditDTO feedbackDTO, UUID activityId, UUID organizationId, UUID userId);
+    FeedbackViewDTO findFeedback(UUID feedbackId, UUID activityId, UUID organizationId);
+    Feedback findEntity(UUID feedbackId, UUID activityId, UUID organizationId);
+    List<FeedbackViewDTO> findAllOrganizationActivityFeedbacks(UUID activityId, UUID organizationId);
+    void delete(UUID feedbackId, UUID activityId, UUID organizationId, Jwt token);
+    FeedbackViewDTO update(UUID feedbackId, UUID activityId, UUID organizationId, FeedbackEditDTO feedbackDTO, Jwt token);
 }

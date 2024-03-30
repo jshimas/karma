@@ -5,14 +5,11 @@ import com.jshimas.karmaapi.domain.dto.FeedbackViewDTO;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
 import com.jshimas.karmaapi.domain.exceptions.ForbiddenAccessException;
 import com.jshimas.karmaapi.domain.mappers.FeedbackMapper;
-import com.jshimas.karmaapi.entities.Event;
+import com.jshimas.karmaapi.entities.Activity;
 import com.jshimas.karmaapi.entities.Feedback;
 import com.jshimas.karmaapi.entities.User;
 import com.jshimas.karmaapi.repositories.FeedbackRepository;
-import com.jshimas.karmaapi.services.AuthService;
-import com.jshimas.karmaapi.services.EventService;
-import com.jshimas.karmaapi.services.FeedbackService;
-import com.jshimas.karmaapi.services.UserService;
+import com.jshimas.karmaapi.services.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -24,57 +21,57 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService {
-    private final EventService eventService;
-    private final AuthService authService;
+    private final ActivityService activityService;
+    private final AuthTokenService tokenService;
     private final FeedbackMapper feedbackMapper;
     private final FeedbackRepository feedbackRepository;
     private final UserService userService;
 
     @Override
     public FeedbackViewDTO create(FeedbackEditDTO feedbackDTO,
-                                  UUID eventId,
+                                  UUID activityId,
                                   UUID organizationId,
                                   UUID userId) {
 
-        Event event = eventService.findEntity(eventId, organizationId);
+        Activity activity = activityService.findEntity(activityId);
 
         User user = userService.findEntity(userId);
 
         return feedbackMapper.toDTO(
-                feedbackRepository.save(feedbackMapper.create(feedbackDTO, event, user)));
+                feedbackRepository.save(feedbackMapper.create(feedbackDTO, activity, user)));
     }
 
     @Override
-    public FeedbackViewDTO findFeedback(UUID feedbackId, UUID eventId, UUID organizationId) {
-        return feedbackMapper.toDTO(findEntity(feedbackId, eventId, organizationId));
+    public FeedbackViewDTO findFeedback(UUID feedbackId, UUID activityId, UUID organizationId) {
+        return feedbackMapper.toDTO(findEntity(feedbackId, activityId, organizationId));
     }
 
     @Override
-    public Feedback findEntity(UUID feedbackId, UUID eventId, UUID organizationId) {
-        Event event = eventService.findEntity(eventId, organizationId);
+    public Feedback findEntity(UUID feedbackId, UUID activityId, UUID organizationId) {
+        Activity activity = activityService.findEntity(activityId);
 
-        return feedbackRepository.findByIdAndEventId(feedbackId, event.getId())
+        return feedbackRepository.findByIdAndActivityId(feedbackId, activity.getId())
                 .orElseThrow(() -> new NotFoundException(
                         "Feedback not found with ID: " + feedbackId +
-                                " in Event with ID: " + eventId));
+                                " in Activity with ID: " + activityId));
     }
 
     @Override
-    public List<FeedbackViewDTO> findAllOrganizationEventFeedbacks(UUID eventId, UUID organizationId) {
-        Event event = eventService.findEntity(eventId, organizationId);
+    public List<FeedbackViewDTO> findAllOrganizationActivityFeedbacks(UUID activityId, UUID organizationId) {
+        Activity activity = activityService.findEntity(activityId);
 
-        return event.getFeedbacks().stream()
+        return activity.getFeedbacks().stream()
                 .map(feedbackMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void delete(UUID feedbackId, UUID eventId, UUID organizationId, Jwt token) {
-        Feedback feedback = findEntity(feedbackId, eventId, organizationId);
+    public void delete(UUID feedbackId, UUID activityId, UUID organizationId, Jwt token) {
+        Feedback feedback = findEntity(feedbackId, activityId, organizationId);
 
-        boolean userIsAuthor = feedback.getUser().getId().equals(authService.extractId(token));
+        boolean userIsAuthor = feedback.getUser().getId().equals(tokenService.extractId(token));
 
-        if (!userIsAuthor && authService.isAdmin(token)) {
+        if (!userIsAuthor && tokenService.isAdmin(token)) {
             throw new ForbiddenAccessException();
         }
 
@@ -82,11 +79,11 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
-    public FeedbackViewDTO update(UUID feedbackId, UUID eventId, UUID organizationId,
+    public FeedbackViewDTO update(UUID feedbackId, UUID activityId, UUID organizationId,
                                   FeedbackEditDTO feedbackDTO, Jwt token) {
-        Feedback feedback = findEntity(feedbackId, eventId, organizationId);
+        Feedback feedback = findEntity(feedbackId, activityId, organizationId);
 
-        boolean userIsAuthor = feedback.getUser().getId().equals(authService.extractId(token));
+        boolean userIsAuthor = feedback.getUser().getId().equals(tokenService.extractId(token));
 
         if (!userIsAuthor) {
             throw new ForbiddenAccessException();

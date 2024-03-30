@@ -21,7 +21,7 @@ public record OrganizationViewDTO(
         String instagram,
         String youtube,
         String linkedin,
-        List<EventViewDTO> events,
+        List<ActivityViewDTO> activities,
 
         Timestamp createdAt,
         Timestamp updatedAt

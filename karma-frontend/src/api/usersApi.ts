@@ -1,7 +1,7 @@
 import { z } from "zod";
 import api, { HTTPMethod } from "./api";
 import { EmptySchema, VoidSchema } from "../models/Common";
-import { UserSchema, UserCreateSchema } from "../models/Users";
+import { UserSchema, UserCreateSchema, UserEditSchema } from "../models/Users";
 
 export const getCurrentUser = api<
   z.infer<typeof VoidSchema>,
@@ -17,10 +17,21 @@ export const getCurrentUser = api<
 export const createUser = api<
   z.infer<typeof UserCreateSchema>,
   z.infer<typeof EmptySchema>,
-  null
+  { token?: string }
 >({
   method: HTTPMethod.POST,
-  path: "/users",
+  path: `/users?token=:token`,
   requestSchema: UserCreateSchema,
+  responseSchema: EmptySchema,
+});
+
+export const updateUser = api<
+  z.infer<typeof UserEditSchema>,
+  z.infer<typeof EmptySchema>,
+  null
+>({
+  method: HTTPMethod.PUT,
+  path: "/users/me",
+  requestSchema: UserEditSchema,
   responseSchema: EmptySchema,
 });

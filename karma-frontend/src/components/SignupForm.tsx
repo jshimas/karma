@@ -3,7 +3,7 @@ import { Input } from "./ui/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { UserCreate, UserCreateSchema } from "../models/Users";
 import { createUser } from "../api/usersApi";
 import {
@@ -18,11 +18,20 @@ import { getAllOrganizations } from "../api/organizationApi";
 import SpinnerIcon from "../assets/icons/SpinnerIcon";
 import { Button } from "./ui/Button";
 import { useAuth } from "../hooks/useAuth";
-import { getGoogleSignupRedirectUrl } from "../api/authApi";
+import {
+  getGoogleSignupRedirectUrl,
+  validateRegistrationToken,
+} from "../api/authApi";
+import { useToast } from "./ui/Toast/UseToast";
+import { Card } from "./ui/Card";
 
 export default function SignupForm() {
   const { setUserStatus } = useAuth();
+  const { toast } = useToast();
   const [error, setError] = useState<AxiosError | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryParams = Object.fromEntries(searchParams);
+  const registrationToken = localStorage.getItem("registrationToken");
   const navigate = useNavigate();
   const {
     register,
@@ -56,14 +65,20 @@ export default function SignupForm() {
 
   const onSubmit: SubmitHandler<UserCreate> = async (data) => {
     try {
+      localStorage.removeItem("registrationToken");
       await createUser({
         data: {
           ...data,
           organizationId:
             data.role === "organizer" ? data.organizationId : undefined,
         },
+        params: { token: registrationToken! },
       });
       setUserStatus("idle");
+      toast({
+        title: "Account created",
+        description: "You have successfully created an account.",
+      });
       navigate("/login");
     } catch (error) {
       console.log(error);
@@ -79,6 +94,19 @@ export default function SignupForm() {
       window.location.href = redirectUrl.redirectUrl;
     }
   };
+
+  (async () => {
+    if (queryParams?.token) {
+      const validation = await validateRegistrationToken({
+        params: { token: queryParams.token },
+      });
+      if (!validation.valid) {
+        return <Card>{validation.message}</Card>;
+      } else {
+        localStorage.setItem("registrationToken", queryParams.token);
+      }
+    }
+  })();
 
   if (isPending || isPendingGoogle) {
     return <SpinnerIcon />;

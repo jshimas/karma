@@ -1,9 +1,10 @@
 package com.jshimas.karmaapi.services.impl;
 
+import com.jshimas.karmaapi.domain.dto.ValidationResponse;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
-import com.jshimas.karmaapi.entities.RefreshToken;
-import com.jshimas.karmaapi.entities.User;
+import com.jshimas.karmaapi.entities.*;
 import com.jshimas.karmaapi.repositories.RefreshTokenRepository;
+import com.jshimas.karmaapi.repositories.RegistrationTokenRepository;
 import com.jshimas.karmaapi.security.HmacSha256Hasher;
 import com.jshimas.karmaapi.security.SecurityUser;
 import com.jshimas.karmaapi.services.AuthTokenService;
@@ -15,13 +16,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwsHeader;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.TemporalUnit;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.joining;
@@ -33,6 +33,7 @@ public class AuthTokenServiceImpl implements AuthTokenService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtEncoder jwtEncoder;
+    private final RegistrationTokenRepository registrationTokenRepository;
 
     @Value("${jwt.expiration.access}")
     private long accessExpirationMs;
@@ -105,5 +106,60 @@ public class AuthTokenServiceImpl implements AuthTokenService {
     @Transactional
     public void deleteRefreshToken(UUID userId) {
         refreshTokenRepository.deleteByUserId(userId);
+    }
+
+    @Override
+    public String generateRegistrationToken(Organization organization) {
+        RegistrationToken registrationToken = RegistrationToken.builder()
+                .validUntil(Instant.now().plusSeconds(60 * 60 * 24 * 7)) // 1 week
+                .organization(organization)
+                .build();
+
+        RegistrationToken createdToken = registrationTokenRepository.save(registrationToken);
+        return createdToken.getToken().toString();
+    }
+
+    @Override
+    public ValidationResponse validateRegistrationToken(String registrationToken) {
+        if (registrationToken == null )
+            return new ValidationResponse(true, null);
+
+        Optional<RegistrationToken> token = registrationTokenRepository.findById(UUID.fromString(registrationToken))
+
+        if (token.isEmpty())
+            return new ValidationResponse(false, "Registration token is not valid" );
+
+        if (token.get().getValidUntil().compareTo(Instant.now()) < 0) {
+            deleteRegistrationToken(token.get().getToken().toString());
+            return new ValidationResponse(false, "Registration token is expired");
+        }
+
+        return new ValidationResponse(true, null);
+    }
+
+    @Override
+    public void deleteRegistrationToken(String token) {
+        if (token == null ) return;
+        registrationTokenRepository.deleteById(UUID.fromString(token));
+    }
+
+    @Override
+    public Organization getOrganizationFromRegistrationToken(String token) {
+        if (token == null ) return null;
+
+        RegistrationToken registrationToken = registrationTokenRepository.findById(UUID.fromString(token))
+                .orElseThrow(() -> new ValidationException("Registration token is not valid")););
+
+        return registrationToken.getOrganization();
+    }
+
+    @Override
+    public boolean isAdmin(Jwt token) {
+        return token.getClaimAsString("role").equalsIgnoreCase(UserRole.ADMIN);
+    }
+
+    @Override
+    public UUID extractId(Jwt token) {
+        return UUID.fromString(token.getSubject());
     }
 }

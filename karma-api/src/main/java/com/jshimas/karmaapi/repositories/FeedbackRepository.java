@@ -10,6 +10,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface FeedbackRepository extends JpaRepository<Feedback, UUID> {
-    @Query("SELECT f FROM Feedback f WHERE f.id = :feedbackId AND f.event.id = :eventId")
-    Optional<Feedback> findByIdAndEventId(@Param("feedbackId") UUID feedbackId, @Param("eventId") UUID eventId);
+    @Query("SELECT f FROM Feedback f WHERE f.id = :feedbackId AND f.activity.id = :activityId")
+    Optional<Feedback> findByIdAndActivityId(@Param("feedbackId") UUID feedbackId, @Param("activityId") UUID activityId);
 }

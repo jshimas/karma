@@ -40,30 +40,6 @@ public class GoogleServiceImpl implements GoogleService {
         ).setAccessType("offline").build();
     }
 
-
-    private String getAccessToken(String authCode, String redirectUri) {
-        String token;
-        try {
-            token = new GoogleAuthorizationCodeTokenRequest(
-                    new NetHttpTransport(),
-                    new GsonFactory(),
-                    googleClientId,
-                    googleClientSecret,
-                    authCode,
-                    redirectUri
-            ).execute().getAccessToken();
-        } catch (IOException ex) {
-            System.out.println(ExceptionUtils.getStackTrace(ex));
-            throw new UnauthorizedGoogleAccessException();
-        }
-
-        if (token == null) {
-            throw new RuntimeException("Failed to retrieve access token");
-        }
-
-        return token;
-    }
-
     @Override
     public GoogleAccountData getAccountData(String authCode, String redirectUri) {
         String token = getAccessToken(authCode, redirectUri);
@@ -87,6 +63,29 @@ public class GoogleServiceImpl implements GoogleService {
         }
 
         return extractGoogleAccountData(person);
+    }
+
+    private String getAccessToken(String authCode, String redirectUri) {
+        String token;
+        try {
+            token = new GoogleAuthorizationCodeTokenRequest(
+                    new NetHttpTransport(),
+                    new GsonFactory(),
+                    googleClientId,
+                    googleClientSecret,
+                    authCode,
+                    redirectUri
+            ).execute().getAccessToken();
+        } catch (IOException ex) {
+            System.out.println(ExceptionUtils.getStackTrace(ex));
+            throw new UnauthorizedGoogleAccessException();
+        }
+
+        if (token == null) {
+            throw new RuntimeException("Failed to retrieve access token");
+        }
+
+        return token;
     }
 
     private GoogleAccountData extractGoogleAccountData(Person person) {

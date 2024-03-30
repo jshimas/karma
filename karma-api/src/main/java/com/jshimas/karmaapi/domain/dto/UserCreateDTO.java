@@ -12,11 +12,14 @@ public record UserCreateDTO(
         @NotNull @NotBlank @Email String email,
         @NotNull @NotBlank String role,
         String imageUrl,
-        UUID organizationId,
         @NotBlank String password,
         @NotBlank String passwordConfirm
 ) {
     public UserCreateDTO(String firstName, String lastName, String email, String role, String imageUrl) {
-        this(firstName, lastName, email, role, imageUrl, null, null, null);
+        this(firstName, lastName, email, role, imageUrl, null, null);
+    }
+
+    public UserCreateDTO(String firstName, String lastName, String email, String role, String password, String passwordConfirm) {
+        this(firstName, lastName, email, role, null, password, passwordConfirm);
     }
 }

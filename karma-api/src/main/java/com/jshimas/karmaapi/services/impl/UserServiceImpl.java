@@ -1,26 +1,22 @@
 package com.jshimas.karmaapi.services.impl;
 
-import com.jshimas.karmaapi.domain.dto.UserCreateDTO;
-import com.jshimas.karmaapi.domain.dto.UserEditDTO;
-import com.jshimas.karmaapi.domain.dto.UserViewDTO;
+import com.jshimas.karmaapi.domain.dto.*;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
+import com.jshimas.karmaapi.domain.mappers.AcknowledgementMapper;
+import com.jshimas.karmaapi.domain.mappers.GeoPointMapper;
 import com.jshimas.karmaapi.domain.mappers.UserMapper;
 import com.jshimas.karmaapi.entities.*;
-import com.jshimas.karmaapi.repositories.OrganizationRepository;
-import com.jshimas.karmaapi.repositories.OrganizerRepository;
-import com.jshimas.karmaapi.repositories.UserRepository;
-import com.jshimas.karmaapi.services.AuthService;
-import com.jshimas.karmaapi.services.OrganizationService;
-import com.jshimas.karmaapi.services.UserService;
+import com.jshimas.karmaapi.repositories.*;
+import com.jshimas.karmaapi.services.*;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Point;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +25,10 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final OrganizationRepository organizationRepository;
-    private final OrganizerRepository organizerRepository;
+    private final GeoPointMapper geoPointMapper;
+    private final AcknowledgementMapper acknowledgementMapper;
+    private final ScopeRepository scopeRepository;
+    private final UserLocationRepository userLocationRepository;
 
     @Override
     public User findEntity(UUID id) {
@@ -46,7 +45,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserViewDTO create(UserCreateDTO userCreateDTO, String accountType) {
+    public UserViewDTO create(UserCreateDTO userCreateDTO, String accountType, Organization organization) {
         if (userRepository.findByEmail(userCreateDTO.email()).isPresent()) {
             throw new ValidationException("User with this email already exists. Try to login instead.");
         }
@@ -57,19 +56,15 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = createUser(userCreateDTO, accountType);
+        user.setOrganization(organization);
 
         User createdUser = userRepository.save(user);
-
-//        handleOrganizerRole(userCreateDTO, createdUser);
 
         return userMapper.toDTO(createdUser);
     }
 
     private User createUser(UserCreateDTO userCreateDTO, String accountType) {
-        String role = userCreateDTO.role();
-        role = role.equalsIgnoreCase(UserRole.ORGANIZER) ? UserRole.UNVERIFIED_ORGANIZER : role;
-
-        User user = userMapper.create(userCreateDTO, accountType, role);
+        User user = userMapper.create(userCreateDTO, accountType);
 
         if (accountType.equals(AccountType.EMAIL)) {
             user.setPassword(passwordEncoder.encode(userCreateDTO.password()));
@@ -78,31 +73,104 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    private void handleOrganizerRole(UserCreateDTO userCreateDTO, User createdUser) {
-        if (userCreateDTO.role().equalsIgnoreCase(UserRole.ORGANIZER)) {
-            if (userCreateDTO.organizationId() == null) {
-                throw new ValidationException("organizationId is required for the organizer role.");
-            }
-
-            Organization organization = organizationRepository.findById(userCreateDTO.organizationId())
-                    .orElseThrow(() -> new NotFoundException(Organization.class, userCreateDTO.organizationId()));
-
-            Organizer organizer = Organizer.builder()
-                    .organization(organization)
-                    .user(createdUser)
-                    .build();
-
-            Organizer createdOrganizer = organizerRepository.save(organizer);
-            organization.getOrganizers().add(createdOrganizer);
-        }
-    }
-
     @Override
     public void update(UUID userId, UserEditDTO userEditDTO) {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(User.class, userId));
 
+        // Clear all previous scopes
+        existingUser.getScopes().clear();
+
+        List<String> newScopes = userEditDTO.scopes().stream()
+                .filter(scope -> !scopeRepository.existsByName(scope)).toList();
+
+        // Create new scopes and add them to the user
+        Set<Scope> scopesToAdd = newScopes.stream()
+                .map(scopeName -> Scope.builder()
+                        .name(scopeName)
+                        .users(Set.of(existingUser))
+                        .build())
+                .collect(Collectors.toSet());
+
+        scopeRepository.saveAll(scopesToAdd);
+
+        // Add existing scopes to the user
+        userEditDTO.scopes().stream()
+                .filter(scope -> !newScopes.contains(scope))
+                .map(scopeRepository::findByName)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(existingScope -> {
+                    existingScope.getUsers().add(existingUser);
+                    existingUser.getScopes().add(existingScope);
+                });
+
+        // Clear all user geolocations
+        userLocationRepository.deleteAll(userLocationRepository.findByUserId(userId));
+        existingUser.getLocations().clear();
+
+        // Create new geolocations for the user
+        List<UserLocation> newLocations = userEditDTO.geoLocations().stream()
+                .map(userLocationDTO -> UserLocation.builder()
+                        .name(userLocationDTO.name())
+                        .location(geoPointMapper.geoPointDtoToPoint(userLocationDTO.location()))
+                        .address(userLocationDTO.address())
+                        .user(existingUser)
+                        .build())
+                .toList();
+
+        userLocationRepository.saveAll(newLocations);
+        existingUser.getLocations().addAll(newLocations);
+
         userMapper.updateEntityFromDTO(userEditDTO, existingUser);
         userRepository.save(existingUser);
+    }
+
+    @Override
+    public UserViewDTO getUserInfo(UUID userId) {
+        User user = findEntity(userId);
+
+        List<Participation> participations = user.getApplications().stream()
+                .flatMap(a -> a.getParticipations().stream())
+                .toList();
+
+        Integer collectedHours = participations
+                .stream()
+                .map(Participation::getHoursWorked)
+                .filter(Objects::nonNull)
+                .reduce(0, Integer::sum);
+
+        List<String> scopes = user.getScopes().stream()
+                .map(Scope::getName)
+                .toList();
+
+        List<UserLocationDTO> userLocations = user.getLocations().stream()
+                .map(userLocation -> new UserLocationDTO(
+                            userLocation.getId(),
+                            userLocation.getName(),
+                            geoPointMapper.pointToGeoPointDto(userLocation.getLocation()),
+                            userLocation.getAddress())
+                        )
+                .toList();
+
+        List<AcknowledgementViewDTO> userAcks = participations.stream()
+                .flatMap(participation -> participation.getAcknowledgements().stream())
+                .map(acknowledgementMapper::toDTO)
+                .toList();
+
+        return new UserViewDTO(
+                user.getId(),
+               user.getOrganization().getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getRole(),
+                user.getBio(),
+                user.getImageUrl(),
+                collectedHours,
+                scopes,
+                userLocations
+//                userAcks
+        );
     }
 }

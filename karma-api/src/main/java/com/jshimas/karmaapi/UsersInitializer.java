@@ -1,16 +1,14 @@
 package com.jshimas.karmaapi;
 
-import com.jshimas.karmaapi.entities.AccountType;
-import com.jshimas.karmaapi.entities.User;
-import com.jshimas.karmaapi.entities.UserRole;
-import com.jshimas.karmaapi.repositories.AccountTypeRepository;
-import com.jshimas.karmaapi.repositories.UserRepository;
-import com.jshimas.karmaapi.repositories.UserRoleRepository;
+import com.jshimas.karmaapi.entities.*;
+import com.jshimas.karmaapi.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Component
 @Profile("default")
@@ -20,6 +18,7 @@ public class UsersInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final AccountTypeRepository accountTypeRepository;
+    private final OrganizationRepository organizationRepository;
 
     @Override
     public void run(String... args) {
@@ -43,6 +42,22 @@ public class UsersInitializer implements CommandLineRunner {
                     .lastName("volunteer")
                     .accountType(accountTypeRepository.findByTypeIgnoreCase(AccountType.EMAIL).get())
                     .password(passwordEncoder.encode("testvolunteer")).build();
+
+            userRepository.save(user);
+        }
+
+        if (!userRepository.existsByEmail("simjustinas@gmail.com")) {
+            Organization organization = organizationRepository.findById(
+                    UUID.fromString("cbe308ea-23b7-4e7a-b07b-39ebfddbd0b7")).get();
+
+            User user = User.builder()
+                    .email("simjustinas@gmail.com")
+                    .role(userRoleRepository.findByRoleIgnoreCase(UserRole.ORGANIZER).get())
+                    .firstName("Justinas")
+                    .lastName("Simas")
+                    .organization(organization)
+                    .accountType(accountTypeRepository.findByTypeIgnoreCase(AccountType.GOOGLE).get())
+                    .build();
 
             userRepository.save(user);
         }

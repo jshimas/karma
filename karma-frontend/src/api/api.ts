@@ -32,6 +32,8 @@ export default function api<Request, Response, Parameters>({
   return function ({ data, params }) {
     requestSchema.parse(data);
 
+    console.log("api call", method, path, data, params);
+
     const headers: Record<string, string> = {};
 
     const jwt: string | undefined = Cookies.get("jwt");
@@ -43,10 +45,12 @@ export default function api<Request, Response, Parameters>({
       const updatedPath = buildUrlWithParams(path, params);
       const response = await axios({
         baseURL: "http://127.0.0.1:8080/api/v1",
-        // baseURL: "https://karma-api-crb2z.ondigitalocean.app/api/v1",
         method,
         url: updatedPath,
         [method === HTTPMethod.GET ? "params" : "data"]: data,
+        paramsSerializer: {
+          indexes: null,
+        },
         headers,
       });
 

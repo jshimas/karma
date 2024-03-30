@@ -8,7 +8,7 @@ import java.util.UUID;
 public record FeedbackViewDTO(
         @NotNull @NotBlank UUID id,
         @NotNull @NotBlank UUID userId,
-        @NotNull @NotBlank UUID eventId,
+        @NotNull @NotBlank UUID activityId,
         @NotNull @NotBlank String comment
 ) {
 }

@@ -14,6 +14,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext";
 import SignupGooglePage from "./pages/Authorization/SignupGooglePage";
+import ProfilePage from "./pages/Users/ProfilePage";
+import ProfileEditPage from "./pages/Users/ProfileEditPage";
 
 const router = createBrowserRouter([
   {
@@ -34,11 +36,32 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <OrganizationsPage />,
+        element: <ActivitiesPage />,
       },
       {
         path: "/activities",
         element: <ActivitiesPage />,
+      },
+      {
+        path: "/users",
+        children: [
+          {
+            path: "/users/me",
+            element: (
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "/users/me/edit",
+            element: (
+              <ProtectedRoute>
+                <ProfileEditPage />
+              </ProtectedRoute>
+            ),
+          },
+        ],
       },
       {
         path: "/organizations",

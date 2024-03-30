@@ -1,9 +1,8 @@
 package com.jshimas.karmaapi.domain.mappers;
 
 import com.jshimas.karmaapi.domain.dto.OrganizationEditDTO;
-import com.jshimas.karmaapi.domain.dto.OrganizationNoEventsDTO;
+import com.jshimas.karmaapi.domain.dto.OrganizationNoActivitiesDTO;
 import com.jshimas.karmaapi.domain.dto.OrganizationViewDTO;
-import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
 import com.jshimas.karmaapi.entities.Organization;
 import com.jshimas.karmaapi.entities.OrganizationType;
 import com.jshimas.karmaapi.repositories.OrganizationTypeRepository;
@@ -15,7 +14,7 @@ import static org.mapstruct.NullValueCheckStrategy.ALWAYS;
 import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
 
 @Mapper(componentModel = "spring",
-        uses = {EventMapper.class},
+        uses = {ActivityMapper.class},
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class OrganizationMapper {
     @Autowired
@@ -25,7 +24,7 @@ public abstract class OrganizationMapper {
     public abstract OrganizationViewDTO toDTO(Organization organization);
 
     @Mapping(target = "type", source = "type", qualifiedByName = "organizationTypeToString")
-    public abstract OrganizationNoEventsDTO toNoEventsDTO(Organization organization);
+    public abstract OrganizationNoActivitiesDTO toNoActivitiesDTO(Organization organization);
 
     @Mapping(target = "type", source = "type", qualifiedByName = "stringToOrganizationType")
     public abstract Organization toEntity(OrganizationEditDTO organizationDTO);

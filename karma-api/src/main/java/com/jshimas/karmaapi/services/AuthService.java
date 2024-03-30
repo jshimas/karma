@@ -9,7 +9,5 @@ public interface AuthService {
     LoginResponseTokens login(AuthRequest authRequest);
     void logout(Jwt currentUserJwt);
     AccessTokenResponse updateAccessToken(RefreshTokenRequest refreshTokenRequest);
-    UserViewDTO getCurrentUser(Jwt token);
-    boolean isAdmin(Jwt token);
-    UUID extractId(Jwt token);
+
 }

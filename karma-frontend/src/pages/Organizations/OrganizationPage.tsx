@@ -18,12 +18,33 @@ import {
   AlertDialogHeader,
   AlertDialogFooter,
   AlertDialogDelete,
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "../../components/ui/Dialog";
 import PenIcon from "../../assets/icons/PenIcon";
+import { Label } from "../../components/ui/Label";
+import { Input } from "../../components/ui/Input";
+import UserPlusIcon from "../../assets/icons/UserPlusIcon";
+import { useState } from "react";
+import { sendOrganizerInvitation } from "../../api/authApi";
+import { z } from "zod";
+import ErrorMessage from "../../components/ErrorMessage";
+import { useToast } from "../../components/ui/Toast/UseToast";
+
+const invitation = z.string().email();
 
 export default function OrganizationPage() {
+  const [invitationTo, setInvitationTo] = useState<string>("");
+  const [isInvitationValid, setIsValidInvitation] = useState(false);
+  const [isInvitationFormOpen, setIsInvitationFormOpen] = useState(false);
   const { organizationId } = useParams();
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const queryClient = useQueryClient();
 
@@ -52,6 +73,38 @@ export default function OrganizationPage() {
       }),
   });
 
+  const handleEmailChange = (email: string) => {
+    setInvitationTo(email);
+    setIsValidInvitation(invitation.safeParse(email).success);
+  };
+
+  const sendInvitationMutation = useMutation({
+    mutationFn: async () => {
+      console.log(user, organization, invitationTo);
+      if (!user || !organization) return null;
+      console.log("send invitation");
+
+      return await sendOrganizerInvitation({
+        data: {
+          toEmail: invitationTo,
+          fromEmail: user?.email,
+          fromName: user?.firstName,
+          organizationName: organization?.name,
+        },
+      });
+    },
+  });
+
+  const handleSendInvitation = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await sendInvitationMutation.mutate();
+    setIsInvitationFormOpen(false);
+    toast({
+      title: "Invitation sent",
+      description: `An invitation has been sent to ${invitationTo}`,
+    });
+  };
+
   if (isPending) {
     return <SpinnerIcon />;
   }
@@ -61,14 +114,70 @@ export default function OrganizationPage() {
   }
 
   return (
-    <div className="mx-6 my-12 md:mx-12 w-4/5 xl:w-1/2 flex flex-col gap-14 sm:flex-row text-slate-800">
+    <div className="mx-6 my-24 md:mx-12 w-4/5 xl:w-1/2 flex flex-col gap-14 sm:flex-row text-slate-800">
       <div className="basis-1/2 md:border-r-2 pr-4">
         <div className="flex gap-3 items-center">
           <h2 className="text-3xl font-semibold">{organization.name}</h2>
           {user?.organizationId === organizationId && (
-            <Link to={`/organizations/${organizationId}/edit`}>
-              <PenIcon className="text-slate-600 w-5 h-5" />
-            </Link>
+            <div className="flex gap-3 items-center">
+              <Link to={`/organizations/${organizationId}/edit`}>
+                <PenIcon className="text-slate-600 w-5 h-5" />
+              </Link>
+              <Dialog open={isInvitationFormOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="link"
+                    className="text-slate-600 p-0"
+                    onClick={() => setIsInvitationFormOpen(true)}
+                  >
+                    <UserPlusIcon className="w-5 h-5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Invite an organizer</DialogTitle>
+                    <DialogDescription>
+                      Send an invitation to someone to join your organization
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleSendInvitation}>
+                    <div className="flex space-x-4 items-center justify-center">
+                      <Label
+                        htmlFor="invitationTo"
+                        className="-translate-y-0.5 "
+                      >
+                        Email
+                      </Label>
+                      <Input
+                        id="invitationTo"
+                        value={invitationTo}
+                        onChange={(e) => handleEmailChange(e.target.value)}
+                        className="w-2/3"
+                      />
+                      {sendInvitationMutation.isError && (
+                        <ErrorMessage
+                          message={sendInvitationMutation.error?.message}
+                        />
+                      )}
+                    </div>
+                  </form>
+                  <DialogFooter>
+                    <Button
+                      type="submit"
+                      disabled={
+                        !isInvitationValid || sendInvitationMutation.isPending
+                      }
+                    >
+                      {sendInvitationMutation.isPending ? (
+                        <SpinnerIcon />
+                      ) : (
+                        "Send invitation"
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
           )}
         </div>
         <p className="mb-1">{organization.mission}</p>
@@ -130,7 +239,7 @@ export default function OrganizationPage() {
           Organization's events
         </h2>
         <ul className="mb-8">
-          {organization.events?.map((activity) => {
+          {organization.activities?.map((activity) => {
             const date = new Date(activity.startDate);
             const formatedDate = date.toISOString().split("T")[0];
 
@@ -204,7 +313,7 @@ export default function OrganizationPage() {
             <Link to={`/organizations/${organization.id}/activities/create`}>
               <Button>
                 <PlusIcon />
-                Create event
+                Create activity
               </Button>
             </Link>
           </div>

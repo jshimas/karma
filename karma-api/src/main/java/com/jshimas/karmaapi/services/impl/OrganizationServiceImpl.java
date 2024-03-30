@@ -1,14 +1,14 @@
 package com.jshimas.karmaapi.services.impl;
 
 import com.jshimas.karmaapi.domain.dto.OrganizationEditDTO;
-import com.jshimas.karmaapi.domain.dto.OrganizationNoEventsDTO;
+import com.jshimas.karmaapi.domain.dto.OrganizationNoActivitiesDTO;
 import com.jshimas.karmaapi.domain.dto.OrganizationViewDTO;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
 import com.jshimas.karmaapi.domain.exceptions.ForbiddenAccessException;
 import com.jshimas.karmaapi.domain.mappers.OrganizationMapper;
 import com.jshimas.karmaapi.entities.Organization;
 import com.jshimas.karmaapi.repositories.OrganizationRepository;
-import com.jshimas.karmaapi.services.AuthService;
+import com.jshimas.karmaapi.services.AuthTokenService;
 import com.jshimas.karmaapi.services.OrganizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -23,14 +23,14 @@ import java.util.stream.Collectors;
 public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final OrganizationMapper organizationMapper;
-    private final AuthService authService;
+    private final AuthTokenService tokenService;
 
     @Override
-    public OrganizationNoEventsDTO create(OrganizationEditDTO organizationDTO) {
+    public OrganizationNoActivitiesDTO create(OrganizationEditDTO organizationDTO) {
         Organization organization =
                 organizationRepository.save(organizationMapper.toEntity(organizationDTO));
 
-        return organizationMapper.toNoEventsDTO(organization);
+        return organizationMapper.toNoActivitiesDTO(organization);
     }
 
     @Override
@@ -48,9 +48,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public List<OrganizationNoEventsDTO> findAll() {
+    public List<OrganizationNoActivitiesDTO> findAll() {
         return organizationRepository.findAll().stream()
-                .map(organizationMapper::toNoEventsDTO)
+                .map(organizationMapper::toNoActivitiesDTO)
                 .collect(Collectors.toList());
     }
 
@@ -68,9 +68,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 .orElseThrow(() -> new NotFoundException(Organization.class, id));
 
         boolean userIsOrganizer = existingOrganization.getOrganizers().stream()
-                .anyMatch(organizer -> organizer.getUser().getId().equals(authService.extractId(token)));
+                .anyMatch(organizer -> organizer.getUser().getId().equals(tokenService.extractId(token)));
 
-        if (!userIsOrganizer && !authService.isAdmin(token)) {
+        if (!userIsOrganizer) {
             throw new ForbiddenAccessException();
         }
 

@@ -2,11 +2,16 @@ package com.jshimas.karmaapi.controllers;
 
 import com.jshimas.karmaapi.domain.dto.*;
 import com.jshimas.karmaapi.entities.AccountType;
+import com.jshimas.karmaapi.entities.Organization;
+import com.jshimas.karmaapi.entities.User;
+import com.jshimas.karmaapi.entities.UserRole;
 import com.jshimas.karmaapi.services.AuthService;
 import com.jshimas.karmaapi.services.AuthTokenService;
 import com.jshimas.karmaapi.services.GoogleService;
 import com.jshimas.karmaapi.services.UserService;
+import com.jshimas.karmaapi.services.impl.GmailEmailService;
 import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,6 +31,7 @@ public class AuthController {
     private final GoogleService googleService;
     private final UserService userService;
     private final AuthTokenService tokenService;
+    private final GmailEmailService emailService;
 
     private final String SIGNUP_GOOGLE_URL = "http://localhost:5173/signup-google";
     private final String LOGIN_GOOGLE_URL = "http://localhost:5173/login";
@@ -50,6 +56,20 @@ public class AuthController {
         return authService.updateAccessToken(request);
     }
 
+    @PostMapping("/send-organizer-invitation")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void sendRegistrationEmail(@RequestBody @Valid SendOrganizerInvitationRequest emailRequest,
+                                      @AuthenticationPrincipal Jwt currentUserJwt) {
+        User user = userService.findEntity(tokenService.extractId(currentUserJwt));
+        String registrationToken = tokenService.generateRegistrationToken(user.getOrganization());
+        emailService.sendRegistrationEmail(emailRequest, registrationToken);
+    }
+
+    @GetMapping("/validate-registration-token")
+    public ValidationResponse validateRegistrationToken(@RequestParam("token") String token) {
+        return tokenService.validateRegistrationToken(token);
+    }
+
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logoutUser(@AuthenticationPrincipal Jwt currentUserJwt) {
@@ -57,8 +77,10 @@ public class AuthController {
     }
 
     @GetMapping("/oauth2/google/signup-url")
-    public ResponseEntity<OAuth2RedirectUrl> oauthSignupUrl() {
-        String authUrl = googleService.generateAuthorizationCodeRequestUrl(SIGNUP_GOOGLE_URL);
+    public ResponseEntity<OAuth2RedirectUrl> oauthSignupUrl(@RequestParam(value = "token", required = false) String token) {
+        tokenService.validateRegistrationToken(token);
+        String registrationUrl = token != null && !token.isBlank() ? SIGNUP_GOOGLE_URL + "?token=" + token : SIGNUP_GOOGLE_URL;
+        String authUrl = googleService.generateAuthorizationCodeRequestUrl(registrationUrl);
         return ResponseEntity.ok(new OAuth2RedirectUrl(authUrl));
     }
 
@@ -70,16 +92,40 @@ public class AuthController {
 
     @PostMapping("/oauth2/google/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<AccessTokenResponse> createGoogleUser(@RequestBody @Valid GoogleSignupDTO googleSignupDTO, @RequestParam("code") String code) {
-        GoogleAccountData accountData = googleService.getAccountData(code, SIGNUP_GOOGLE_URL);
+    public ResponseEntity<AccessTokenResponse> createGoogleUser(@RequestBody @Valid GoogleSignupDTO googleSignupDTO,
+                                                                @RequestParam("code") String code,
+                                                                @RequestParam(value = "token", required = false) String token) {
+        ValidationResponse validationResponse = tokenService.validateRegistrationToken(token);
 
-        UserViewDTO createdUser = userService.create(new UserCreateDTO(
-                        accountData.firstName(),
-                        accountData.lastName(),
-                        accountData.email(),
-                        googleSignupDTO.role(),
-                        accountData.imageUrl()),
-                AccountType.GOOGLE);
+        if (!validationResponse.valid()) {
+            throw new ValidationException(validationResponse.message());
+        }
+
+        String registrationUrl = token != null && !token.isBlank() ? SIGNUP_GOOGLE_URL + "?token=" + token : SIGNUP_GOOGLE_URL;
+        GoogleAccountData accountData = googleService.getAccountData(code, registrationUrl);
+
+        UserViewDTO createdUser;
+        if (token != null && !token.isBlank()) {
+            Organization organization = tokenService.getOrganizationFromRegistrationToken(token);
+            UserCreateDTO userCreateOrganizerDTO = new UserCreateDTO(
+                    accountData.firstName(),
+                    accountData.lastName(),
+                    accountData.email(),
+                    UserRole.ORGANIZER,
+                    accountData.imageUrl()
+            );
+            createdUser = userService.create(userCreateOrganizerDTO, AccountType.GOOGLE, organization);
+        } else {
+            createdUser = userService.create(new UserCreateDTO(
+                    accountData.firstName(),
+                    accountData.lastName(),
+                    accountData.email(),
+                    googleSignupDTO.role(),
+                    accountData.imageUrl()),
+                    AccountType.GOOGLE, null);
+        }
+
+        tokenService.deleteRegistrationToken(token);
 
         URI location = URI.create("/users/" + createdUser.id());
 
@@ -92,7 +138,6 @@ public class AuthController {
 
     @PostMapping("/oauth2/google/login")
     public ResponseEntity<AccessTokenResponse> loginGoogleUser(@RequestParam("code") String code) {
-        System.out.println("code: " + code);
         GoogleAccountData accountData = googleService.getAccountData(code, LOGIN_GOOGLE_URL);
 
         UserViewDTO user = userService.findByEmail(accountData.email());

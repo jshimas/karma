@@ -1,16 +1,26 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/DropdownMenu";
+import UserIcon from "../assets/icons/UserIcon";
+import { Button } from "./ui/Button";
 
 export default function Header() {
   const [isMenuOpen, setMenuOpen] = useState<boolean>(false);
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
-    <div className="h-14 flex items-center sm:gap-8 border-b-2 border-teal-700 px-8 justify-between">
+    <div className="h-10 flex items-center ps-8 pr-2 justify-between absolute z-10 top-4 left-1/2 -translate-x-1/2 shadow-md bg-white rounded-full w-4/5 lg:w-2/3 xl:w-1/2">
       <Link
         to={"/"}
-        className="uppercase text-2xl tracking-wide font-light text-teal-700"
+        className="uppercase text-2xl tracking-wide font-light text-teal-700 mr-8"
       >
         Karma
       </Link>
@@ -18,20 +28,19 @@ export default function Header() {
       <div className="hidden sm:flex flex-1 items-center justify-between text-slate-800 h-full">
         <div className="flex gap-6 md:gap-8">
           <Link
-            to={"/activities"}
+            to={"/"}
             className="transition text-slate-600 hover:text-teal-700"
           >
             Activities
           </Link>
-          <Link
-            to={"/organizations"}
-            className="transition text-slate-600 hover:text-teal-700"
-          >
-            Organizations
-          </Link>
-        </div>
-
-        <div className="space-x-4 h-2/3 flex justify-center items-center">
+          {user?.role === "admin" && (
+            <Link
+              to={"/organizations"}
+              className="transition text-slate-600 hover:text-teal-700"
+            >
+              Organizations
+            </Link>
+          )}
           {user?.role === "organizer" && (
             <Link
               to={`/organizations/${user?.organizationId}`}
@@ -40,6 +49,9 @@ export default function Header() {
               My Organization
             </Link>
           )}
+        </div>
+
+        <div className="space-x-4 h-2/3 flex justify-center items-center">
           {!user ? (
             <>
               <Link
@@ -56,13 +68,29 @@ export default function Header() {
               </Link>
             </>
           ) : (
-            <Link
-              to={"/"}
-              onClick={logout}
-              className="transition-all h-full px-4 border-2 rounded-md border-teal-700 text-teal-700 font-semibold flex items-center hover:bg-teal-50 "
-            >
-              Logout
-            </Link>
+            <div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant={"link"} className="px-3 py-1 rounded-full">
+                    <UserIcon />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => navigate("/users/me")}>
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      logout();
+                      navigate("/");
+                    }}
+                  >
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           )}
         </div>
       </div>

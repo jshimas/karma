@@ -9,7 +9,7 @@ export const updateFeedback = api<
   { organizationId: string; activityId: string; feedbackId: string }
 >({
   method: HTTPMethod.PUT,
-  path: "/organizations/:organizationId/events/:activityId/feedbacks/:feedbackId",
+  path: "/organizations/:organizationId/activities/:activityId/feedbacks/:feedbackId",
   requestSchema: FeedbackEditSchema,
   responseSchema: EmptySchema,
 });
@@ -20,7 +20,7 @@ export const createFeedback = api<
   { organizationId: string; activityId: string }
 >({
   method: HTTPMethod.POST,
-  path: "/organizations/:organizationId/events/:activityId/feedbacks",
+  path: "/organizations/:organizationId/activities/:activityId/feedbacks",
   requestSchema: FeedbackEditSchema,
   responseSchema: FeedbackSchema,
 });
@@ -31,7 +31,7 @@ export const deleteFeedback = api<
   { organizationId: string; activityId: string; feedbackId: string }
 >({
   method: HTTPMethod.DELETE,
-  path: "/organizations/:organizationId/events/:activityId/feedbacks/:feedbackId",
+  path: "/organizations/:organizationId/activities/:activityId/feedbacks/:feedbackId",
   requestSchema: VoidSchema,
   responseSchema: EmptySchema,
 });

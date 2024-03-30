@@ -7,7 +7,7 @@ export const FeedbackEditSchema = z.object({
 export const FeedbackSchema = FeedbackEditSchema.merge(
   z.object({
     id: z.string(),
-    eventId: z.string(),
+    activityId: z.string(),
     userId: z.string(),
   })
 );

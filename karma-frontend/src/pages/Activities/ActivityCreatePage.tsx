@@ -15,11 +15,13 @@ export default function ActivityCreatePage() {
   const onSubmit: SubmitHandler<ActivityEdit> = async (data) => {
     setLoading(true);
 
+    console.log(organizationId);
+
     try {
       const activity = await createActivity({
         data: {
           ...data,
-          startDate: data.startDate + `T${data.startTime}:00Z`,
+          address: data.address.split("::")[0],
         },
         params: { organizationId: organizationId! },
       });
@@ -35,11 +37,5 @@ export default function ActivityCreatePage() {
     }
   };
 
-  return (
-    <div className="w-4/5 md:w-1/2 lg:w-1/3 text-slate-800 m-12">
-      <h1 className="text-2xl mb-8">Please fill the activity details</h1>
-      <ActivityForm onSubmit={onSubmit} isSubmitting={loading} />
-      {error && <p>{error.message}</p>}
-    </div>
-  );
+  return <ActivityForm onSubmit={onSubmit} isSubmitting={loading} />;
 }

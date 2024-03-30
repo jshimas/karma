@@ -1,15 +1,9 @@
 package com.jshimas.karmaapi.services.impl;
 
 import com.jshimas.karmaapi.domain.dto.*;
-import com.jshimas.karmaapi.domain.mappers.UserMapper;
-import com.jshimas.karmaapi.entities.Organizer;
-import com.jshimas.karmaapi.entities.User;
-import com.jshimas.karmaapi.entities.UserRole;
-import com.jshimas.karmaapi.repositories.OrganizerRepository;
 import com.jshimas.karmaapi.security.SecurityUser;
 import com.jshimas.karmaapi.services.AuthService;
 import com.jshimas.karmaapi.services.AuthTokenService;
-import com.jshimas.karmaapi.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,7 +11,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.joining;
@@ -27,9 +20,6 @@ import static java.util.stream.Collectors.joining;
 public class AuthServiceImpl implements AuthService {
     private final AuthTokenService tokenService;
     private final AuthenticationManager authenticationManager;
-    private final UserMapper userMapper;
-    private final UserService userService;
-    private final OrganizerRepository organizerRepository;
 
     @Override
     public LoginResponseTokens login(AuthRequest authRequest) {
@@ -50,29 +40,10 @@ public class AuthServiceImpl implements AuthService {
         return new AccessTokenResponse(tokenService.updateAccessToken(refreshTokenRequest.refreshToken()));
     }
 
-    @Override
-    public UserViewDTO getCurrentUser(Jwt token) {
-        User user = userService.findEntity(extractId(token));
-        Optional<Organizer> organizer = organizerRepository.findByUserId(user.getId());
-
-        return organizer.map(o -> userMapper.toDTO(user, o.getOrganization().getId()))
-                .orElse(userMapper.toDTO(user));
-    }
-
 
     @Override
     public void logout(Jwt currentUserJwt) {
-        UUID userId = extractId(currentUserJwt);
+        UUID userId = tokenService.extractId(currentUserJwt);
         tokenService.deleteRefreshToken(userId);
-    }
-
-    @Override
-    public boolean isAdmin(Jwt token) {
-        return token.getClaimAsString("role").equalsIgnoreCase(UserRole.ADMIN);
-    }
-
-    @Override
-    public UUID extractId(Jwt token) {
-        return UUID.fromString(token.getSubject());
     }
 }

@@ -16,6 +16,17 @@ spring:
           google:
             client-id: 322488238877-9r05t6n4fi1suc1ho7bl4jl71v163rg4.apps.googleusercontent.com
             client-secret: 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
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: simjustinas@gmail.com
+    password: 'okgs iqbt aqch yhnq'
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 jwt:
   secret:

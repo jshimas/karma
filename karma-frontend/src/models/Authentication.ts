@@ -24,8 +24,14 @@ export const GoogleProfileResponseSchema = z.object({
   imageUrl: z.string(),
 });
 
-export const AccessTokenRequestSchema = z.object({ refreshToken: z.string() });
+export const SendOrganizerInvitationRequestSchema = z.object({
+  toEmail: z.string().email(),
+  fromEmail: z.string().email(),
+  fromName: z.string(),
+  organizationName: z.string(),
+});
 
+export const AccessTokenRequestSchema = z.object({ refreshToken: z.string() });
 export const AccessTokenResponseSchema = z.object({ accessToken: z.string() });
 
 export type Login = z.infer<typeof LoginSchema>;

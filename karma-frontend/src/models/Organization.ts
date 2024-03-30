@@ -55,7 +55,7 @@ export const OrganizationEditSchema = z.object({
 export const OrganizationSchema = OrganizationEditSchema.merge(HasIDSchema);
 
 export const OrganizationWithEventsSchema = OrganizationSchema.merge(
-  z.object({ events: ActivityListSchema })
+  z.object({ activities: ActivityListSchema })
 );
 
 export const OrganizationListSchema = z.array(OrganizationSchema);

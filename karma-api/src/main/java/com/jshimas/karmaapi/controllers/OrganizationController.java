@@ -1,7 +1,7 @@
 package com.jshimas.karmaapi.controllers;
 
 import com.jshimas.karmaapi.domain.dto.OrganizationEditDTO;
-import com.jshimas.karmaapi.domain.dto.OrganizationNoEventsDTO;
+import com.jshimas.karmaapi.domain.dto.OrganizationNoActivitiesDTO;
 import com.jshimas.karmaapi.domain.dto.OrganizationViewDTO;
 import com.jshimas.karmaapi.entities.UserRole;
 import com.jshimas.karmaapi.services.OrganizationService;
@@ -30,14 +30,14 @@ public class OrganizationController {
     }
 
     @GetMapping()
-    public List<OrganizationNoEventsDTO> getAllOrganizations() {
+    public List<OrganizationNoActivitiesDTO> getAllOrganizations() {
         return organizationService.findAll();
     }
 
     @Secured(UserRole.ADMIN)
     @PostMapping
-    public ResponseEntity<OrganizationNoEventsDTO> createOrganization(@Valid @RequestBody OrganizationEditDTO organizationDTO) {
-        OrganizationNoEventsDTO createdOrganization = organizationService.create(organizationDTO);
+    public ResponseEntity<OrganizationNoActivitiesDTO> createOrganization(@Valid @RequestBody OrganizationEditDTO organizationDTO) {
+        OrganizationNoActivitiesDTO createdOrganization = organizationService.create(organizationDTO);
 
         URI location = URI.create("/api/v1/organizations/" + createdOrganization.id());
 

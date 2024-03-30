@@ -1,16 +1,34 @@
 import { z } from "zod";
+import { GeoPointDTOSchema } from "./Activity";
 
-export const UserUpdateSchema = z.object({
+const EditUserLocation = z.object({
+  name: z.string(),
+  address: z.string(),
+  location: GeoPointDTOSchema,
+});
+
+const UserLocationSchema = EditUserLocation.merge(
+  z.object({
+    id: z.string().uuid(),
+  })
+);
+
+export const UserEditSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   role: z.string(),
+  bio: z.string().nullish(),
+  scopes: z.array(z.string()),
+  geoLocations: z.array(EditUserLocation),
 });
 
-export const UserSchema = UserUpdateSchema.merge(
+export const UserSchema = UserEditSchema.merge(
   z.object({
     id: z.string(),
     email: z.string().email(),
     organizationId: z.string().uuid().nullish(),
+    collectedHours: z.number(),
+    geoLocations: z.array(UserLocationSchema),
   })
 );
 
@@ -47,3 +65,5 @@ export const GoogleUserCreateSchema = z.object({
 
 export type UserCreate = z.infer<typeof UserCreateSchema>;
 export type GoogleUserCreate = z.infer<typeof GoogleUserCreateSchema>;
+export type UserEdit = z.infer<typeof UserEditSchema>;
+export type UserLocation = z.infer<typeof UserLocationSchema>;

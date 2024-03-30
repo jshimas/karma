@@ -1,21 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Login, LoginSchema } from "../models/Authentication";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { login } from "../api/authApi";
-import Cookies from "js-cookie";
+import {
+  getGoogleLoginRedirectUrl,
+  login,
+  loginGoogleUser,
+} from "../api/authApi";
 import { AxiosError } from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "./ui/Button";
 import { getCurrentUser } from "../api/usersApi";
 import { Role } from "../global";
 import { useAuth } from "../hooks/useAuth";
+import { Input } from "./ui/Input";
+import SpinnerIcon from "../assets/icons/SpinnerIcon";
+import { useQuery } from "@tanstack/react-query";
+import Cookies from "js-cookie";
 
 export default function LoginForm() {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [searchParams] = useSearchParams();
+  const [loginLoading, setLoginLoading] = useState<boolean>(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const { setUserStatus } = useAuth();
   const [error, setError] = useState<AxiosError | null>(null);
   const { login: authLogin } = useAuth();
   const navigate = useNavigate();
+  const authCode = searchParams.get("code");
 
   const {
     register,
@@ -25,8 +36,23 @@ export default function LoginForm() {
     resolver: zodResolver(LoginSchema),
   });
 
+  const {
+    data: redirectUrl,
+    isPending: isPendingGoogle,
+    isError: isErrorGoogle,
+    error: errorFetchGoogleUrl,
+  } = useQuery({
+    queryKey: ["googleRedirectUrl"],
+    queryFn: async () => await getGoogleLoginRedirectUrl({}),
+  });
+
+  const openGoogleAuthorizationWindow = () => {
+    if (redirectUrl) {
+      window.location.href = redirectUrl.redirectUrl;
+    }
+  };
+
   const onSubmit: SubmitHandler<Login> = async (data) => {
-    setLoading(true);
     try {
       const { accessToken: token, refreshToken } = await login({ data });
       Cookies.set("jwt", token);
@@ -43,62 +69,105 @@ export default function LoginForm() {
         console.log(error);
         setError(error);
       }
-    } finally {
-      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    const fetchGoogleUser = async () => {
+      try {
+        if (!authCode) return;
+
+        setLoginLoading(true);
+        const response = await loginGoogleUser({ params: { code: authCode } });
+        Cookies.set("jwt", response.accessToken);
+
+        setUserStatus("loading");
+        const user = await getCurrentUser({});
+        console.log("Authenticated user after Google signup", user);
+        authLogin({ ...user, role: user.role.toLowerCase() as Role });
+
+        navigate("/");
+      } catch (error) {
+        console.log(error);
+        if (error instanceof AxiosError) {
+          setLoginError(error.response?.data.message);
+        }
+      } finally {
+        setLoginLoading(false);
+      }
+    };
+
+    fetchGoogleUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (isPendingGoogle || loginLoading) {
+    return <SpinnerIcon />;
+  }
+
+  if (isErrorGoogle || loginError) {
+    return <p>{errorFetchGoogleUrl?.message || loginError}</p>;
+  }
+
   return (
     <div className="h-full flex flex-col items-center justify-center bg-gray-50">
-      <div className="max-w-sm w-full">
-        <div className="flex justify-center mb-10">
-          <h2 className="text-3xl text-slate-900">Log in</h2>
+      <div className="w-80 -translate-y-8">
+        <div className="flex justify-center mb-4">
+          <h2 className="text-2xl text-slate-900 font-semibold">Log in</h2>
         </div>
-        <form className="space-y-6 mb-8" onSubmit={handleSubmit(onSubmit)}>
-          <div>
-            <label htmlFor="email" className="sr-only">
-              Email address
-            </label>
-            <input
-              {...register("email")}
-              type="email"
-              placeholder="Email"
-              className="w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-slate-900 rounded-md focus:outline-none focus:ring-teal-500 focus:border-teal-500  focus:ring-2  sm:text-sm"
-            />
-            {errors.email && (
-              <p className="text-red-500">{errors.email.message}</p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="password" className="sr-only">
-              Password
-            </label>
-            <input
-              {...register("password")}
-              type="password"
-              placeholder="Password"
-              className="w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-slate-900 rounded-md focus:outline-none focus:ring-teal-500 focus:border-teal-500  focus:ring-2  sm:text-sm"
-            />
-            {errors.password && (
-              <p className="text-red-500">{errors.password?.message}</p>
-            )}
-          </div>
-          <button
-            disabled={isSubmitting}
-            type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none "
+        <form className="flex flex-col mb-4" onSubmit={handleSubmit(onSubmit)}>
+          <Button
+            type="button"
+            variant={"outline"}
+            className="h-14 mb-2"
+            onClick={() => openGoogleAuthorizationWindow()}
           >
-            {loading ? (
-              <img
-                src="src/assets/spinner.svg"
-                className="animate-spin text-white inline w-4 h-4"
-                alt="loading-spinner"
+            <img
+              className="h-10 mr-1"
+              src="src\assets\google-icon.svg"
+              alt="google icon"
+            />
+            <p className="font-semibold">Continue with Google</p>
+          </Button>
+          <div className="mt-4 relative text-center after:content-['or'] text-slate-800 after:bg-slate-50 after:px-3 after:relative after:bottom-4">
+            <div className="border-t-2 "></div>
+          </div>
+          <div className="flex flex-col gap-4">
+            <div>
+              <label htmlFor="email" className="sr-only">
+                Email
+              </label>
+              <Input {...register("email")} placeholder="Email" />
+              {errors.email && (
+                <p className="text-destructive text-sm my-1">
+                  {errors.email?.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
+              <Input
+                {...register("password")}
+                placeholder="Password"
+                type="password"
               />
-            ) : (
-              "Log in"
-            )}
-          </button>
-          {error && <p className="text-red-500">Wrong credentials!</p>}
+              {errors.password && (
+                <p className="text-destructive text-sm my-1">
+                  {errors.password?.message}
+                </p>
+              )}
+            </div>
+            <Button
+              disabled={isSubmitting}
+              type="submit"
+              className="text-md font-semibold mt-4"
+            >
+              {isSubmitting ? <SpinnerIcon /> : "Log in"}
+            </Button>
+            {error && <p className="text-red-500">Wrong credentials!</p>}
+          </div>
         </form>
 
         <p className="text-slate-600 text-sm text-center">
