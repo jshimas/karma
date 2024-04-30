@@ -16,6 +16,11 @@ import { AuthProvider } from "./context/AuthContext";
 import SignupGooglePage from "./pages/Authorization/SignupGooglePage";
 import ProfilePage from "./pages/Users/ProfilePage";
 import ProfileEditPage from "./pages/Users/ProfileEditPage";
+import UserPage from "./pages/Users/UserPage";
+import VolunteersPage from "./pages/Volunteers/VolunteersPage";
+import PrizeListPage from "./pages/Prizes/PrizeListPage";
+import OrganizationPrizesPage from "./pages/Prizes/OrganizationPrizesPage";
+import { APIProvider } from "@vis.gl/react-google-maps";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +48,10 @@ const router = createBrowserRouter([
         element: <ActivitiesPage />,
       },
       {
+        path: "/prizes",
+        element: <PrizeListPage />,
+      },
+      {
         path: "/users",
         children: [
           {
@@ -61,6 +70,14 @@ const router = createBrowserRouter([
               </ProtectedRoute>
             ),
           },
+          {
+            path: "/users/:userId",
+            element: (
+              <ProtectedRoute>
+                <UserPage />
+              </ProtectedRoute>
+            ),
+          },
         ],
       },
       {
@@ -72,11 +89,7 @@ const router = createBrowserRouter([
           },
           {
             path: "/organizations/:organizationId",
-            element: (
-              <ProtectedRoute>
-                <OrganizationPage />
-              </ProtectedRoute>
-            ),
+            element: <OrganizationPage />,
           },
           {
             path: "/organizations/:organizationId/edit",
@@ -89,7 +102,7 @@ const router = createBrowserRouter([
           {
             path: "/organizations/create",
             element: (
-              <ProtectedRoute roles={["admin"]}>
+              <ProtectedRoute roles={["admin", "organizer"]}>
                 <OrganizationCreatePage />
               </ProtectedRoute>
             ),
@@ -119,6 +132,28 @@ const router = createBrowserRouter([
               },
             ],
           },
+          {
+            path: "/organizations/:organizationId/volunteers",
+            children: [
+              {
+                index: true,
+                element: (
+                  <ProtectedRoute roles={["organizer"]}>
+                    <VolunteersPage />
+                  </ProtectedRoute>
+                ),
+              },
+            ],
+          },
+          {
+            path: "/organizations/:organizationId/prizes",
+            children: [
+              {
+                index: true,
+                element: <OrganizationPrizesPage />,
+              },
+            ],
+          },
         ],
       },
     ],
@@ -134,9 +169,14 @@ const queryClient = new QueryClient();
 export default function App() {
   return (
     <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
+      <APIProvider
+        apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string}
+        libraries={["marker", "places"]}
+      >
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </APIProvider>
     </AuthProvider>
   );
 }

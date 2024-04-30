@@ -22,7 +22,7 @@ import java.util.UUID;
 public class Activity {
     @Id @GeneratedValue(strategy = GenerationType.UUID) private UUID id;
     @NotNull @ManyToOne @JoinColumn(name = "organization_id") private Organization organization;
-    @NotNull@ NotBlank private String name;
+    @NotNull @NotBlank private String name;
     @NotNull private Instant startDate;
     @NotNull private Instant endDate;
     @NotNull @NotBlank private String description;
@@ -30,6 +30,8 @@ public class Activity {
     @NotNull private Boolean isPublic;
     @Column(columnDefinition = "Geometry(Point,4326)")
     private Point geoLocation;
+    @NotNull private Boolean resolved;
+    @NotNull private Integer volunteersNeeded;
     @ManyToMany
     @JoinTable(
             name = "activity_scopes",
@@ -37,8 +39,9 @@ public class Activity {
             inverseJoinColumns = @JoinColumn(name = "scope_id")
     )
     private Set<Scope> scopes = new HashSet<>();
-    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL) private Set<Feedback> feedbacks = new HashSet<>();;
-    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL) private Set<Application> applications = new HashSet<>();;
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL) private Set<Feedback> feedbacks = new HashSet<>();
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL) private Set<Application> applications = new HashSet<>();
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL) private Set<Participation> participations = new HashSet<>();
 
     @CreationTimestamp private Timestamp createdAt;
     @UpdateTimestamp private Timestamp updatedAt;

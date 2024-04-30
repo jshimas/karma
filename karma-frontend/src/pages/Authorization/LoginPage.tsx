@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Footer from "../../components/Footer";
 import LoginForm from "../../components/LoginForm";
+import { Toaster } from "../../components/ui/Toast/Toaster";
 
 export default function LoginPage() {
   return (
@@ -17,6 +18,7 @@ export default function LoginPage() {
         <LoginForm />
       </div>
       <Footer />
+      <Toaster />
     </div>
   );
 }

@@ -1,5 +1,8 @@
 import { z } from "zod";
 import { GeoPointDTOSchema } from "./Activity";
+import { ParticipationSchema } from "./Participation";
+import { PrizeSchema } from "./Prize";
+import { AcknowledgementSchema } from "./Acknowledgement";
 
 const EditUserLocation = z.object({
   name: z.string(),
@@ -20,6 +23,7 @@ export const UserEditSchema = z.object({
   bio: z.string().nullish(),
   scopes: z.array(z.string()),
   geoLocations: z.array(EditUserLocation),
+  image: z.instanceof(File).optional(),
 });
 
 export const UserSchema = UserEditSchema.merge(
@@ -27,8 +31,12 @@ export const UserSchema = UserEditSchema.merge(
     id: z.string(),
     email: z.string().email(),
     organizationId: z.string().uuid().nullish(),
-    collectedHours: z.number(),
-    geoLocations: z.array(UserLocationSchema),
+    karmaPoints: z.number(),
+    geoLocations: z.array(UserLocationSchema).nullable(),
+    participations: z.array(ParticipationSchema).nullable(),
+    prizes: z.array(PrizeSchema).nullable(),
+    acknowledgements: z.array(AcknowledgementSchema).nullable(),
+    imageUrl: z.string().nullable(),
   })
 );
 
@@ -50,9 +58,12 @@ export const UserCreateSchema = z
       }),
     email: z.string().email(),
     role: z.string().min(1, "Role is required"),
-    organizationId: z.string().uuid().optional(),
     password: z.string().min(6),
     passwordConfirm: z.string().min(6),
+    bio: z.string().nullish(),
+    scopes: z.array(z.string()).optional(),
+    geoLocations: z.array(EditUserLocation),
+    token: z.string().optional().nullable(),
   })
   .refine((data) => data.password === data.passwordConfirm, {
     message: "Passwords don't match",
@@ -61,6 +72,10 @@ export const UserCreateSchema = z
 
 export const GoogleUserCreateSchema = z.object({
   role: z.string().min(1, "Role is required"),
+  scopes: z.array(z.string()).optional(),
+  bio: z.string().nullish(),
+  geoLocations: z.array(EditUserLocation).optional(),
+  token: z.string().optional().nullable(),
 });
 
 export type UserCreate = z.infer<typeof UserCreateSchema>;

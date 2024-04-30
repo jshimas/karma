@@ -48,11 +48,15 @@ public class SecurityConfig {
 
                 // Public endpoints
                 .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/organizations").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/refresh-token").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll() // user sign-up
                 .requestMatchers(HttpMethod.GET, "/api/v1/oauth2/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/oauth2/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/validate-registration-token").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/activities").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/organizations/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/organizations/*/activities/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/prizes").permitAll()
 
                 // Private endpoints
                 .anyRequest().authenticated());

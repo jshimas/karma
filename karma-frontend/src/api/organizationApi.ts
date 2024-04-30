@@ -1,12 +1,16 @@
 import { z } from "zod";
 import api, { HTTPMethod } from "./api";
+import multipartApi from "./multipartApi";
 import { EmptySchema, VoidSchema } from "../models/Common";
 import {
   OrganizationEditSchema,
   OrganizationListSchema,
   OrganizationSchema,
   OrganizationWithEventsSchema,
+  VolunteerListRequestSchema,
+  VolunteerListSchema,
 } from "../models/Organization";
+import { UserIdsSchema } from "../models/Participation";
 
 export const getOrganization = api<
   z.infer<typeof VoidSchema>,
@@ -30,25 +34,21 @@ export const getAllOrganizations = api<
   responseSchema: OrganizationListSchema,
 });
 
-export const createOrganization = api<
-  z.infer<typeof OrganizationEditSchema>,
+export const createOrganization = multipartApi<
   z.infer<typeof OrganizationSchema>,
   undefined
 >({
   method: HTTPMethod.POST,
   path: "/organizations",
-  requestSchema: OrganizationEditSchema,
   responseSchema: OrganizationSchema,
 });
 
-export const updateOrganization = api<
-  z.infer<typeof OrganizationEditSchema>,
+export const updateOrganization = multipartApi<
   z.infer<typeof OrganizationWithEventsSchema>,
   { id: string }
 >({
   method: HTTPMethod.PUT,
   path: "/organizations/:id",
-  requestSchema: OrganizationEditSchema,
   responseSchema: OrganizationWithEventsSchema,
 });
 
@@ -60,5 +60,27 @@ export const deleteOrganization = api<
   method: HTTPMethod.DELETE,
   path: "/organizations/:id",
   requestSchema: VoidSchema,
+  responseSchema: EmptySchema,
+});
+
+export const getOrganizationVolunteers = api<
+  z.infer<typeof VolunteerListRequestSchema>,
+  z.infer<typeof VolunteerListSchema>,
+  { organizationId: string }
+>({
+  method: HTTPMethod.GET,
+  path: "/organizations/:organizationId/volunteers",
+  requestSchema: VolunteerListRequestSchema,
+  responseSchema: VolunteerListSchema,
+});
+
+export const cancelPartnership = api<
+  z.infer<typeof UserIdsSchema>,
+  z.infer<typeof EmptySchema>,
+  { organizationId: string }
+>({
+  method: HTTPMethod.PUT,
+  path: "/organizations/:organizationId/volunteers/cancel-partnership",
+  requestSchema: UserIdsSchema,
   responseSchema: EmptySchema,
 });

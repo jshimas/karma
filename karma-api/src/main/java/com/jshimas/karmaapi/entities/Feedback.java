@@ -5,7 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -14,9 +18,13 @@ import java.util.UUID;
 @Table(name = "feedbacks")
 public class Feedback {
     @Id @GeneratedValue(strategy = GenerationType.UUID) private UUID id;
-    @NotNull @NotBlank private String comment;
+    @NotNull Integer rating;
+    private String comment;
     @NotNull @ManyToOne @JoinColumn(name = "activity_id") private Activity activity;
     @NotNull @ManyToOne @JoinColumn(name = "user_id") private User user;
+
+    @CreationTimestamp private Instant createdAt;
+    @UpdateTimestamp private Instant updatedAt;
 
     public void setActivity(Activity activity) {
         this.activity = activity;

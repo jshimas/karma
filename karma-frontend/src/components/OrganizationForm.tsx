@@ -16,6 +16,7 @@ import {
 import { Button } from "../components/ui/Button";
 import SpinnerIcon from "../assets/icons/SpinnerIcon";
 import { useNavigate } from "react-router-dom";
+import { Label } from "./ui/Label";
 
 interface OrganizationFormProps {
   onSubmit: SubmitHandler<OrganizationEdit>;
@@ -190,10 +191,30 @@ export default function OrganizationForm({
               </p>
             )}
           </div>
+          <div>
+            <Controller
+              control={control}
+              name="image"
+              render={({ field: { value, onChange, ...fieldProps } }) => (
+                <div>
+                  <Label>Image</Label>
+                  <Input
+                    {...fieldProps}
+                    placeholder="Picture"
+                    type="file"
+                    accept="image/*, application/pdf"
+                    onChange={(event) =>
+                      onChange(event.target.files && event.target.files[0])
+                    }
+                  />
+                </div>
+              )}
+            />
+          </div>
         </div>
       </div>
       <div className="flex items-center w-full justify-end gap-2">
-        <Button variant="outline" onClick={() => navigate(`/organizations`)}>
+        <Button variant="outline" onClick={() => navigate(-1)}>
           Cancel
         </Button>
         <Button disabled={isSubmitting} type="submit">

@@ -1,5 +1,6 @@
 package com.jshimas.karmaapi.entities;
 
+import com.google.api.services.people.v1.model.Interest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -10,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,21 +34,43 @@ public class User {
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
     @ManyToOne @JoinColumn(name = "organization_id") private Organization organization;
-    @OneToMany(mappedBy = "user") private List<Application> applications;
+    @Builder.Default private Integer karmaPoints = 0;
+    @OneToMany(mappedBy = "volunteer") private List<Application> applications;
     @OneToMany(mappedBy = "user") private List<Feedback> feedbacks;
-    @OneToMany(mappedBy = "user") private List<UserLocation> locations;
+    @OneToMany(mappedBy = "volunteer") private List<Participation> participations;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL) private List<UserLocation> locations;
     @ManyToMany
     @JoinTable(
             name = "user_scopes",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "scope_id")
     )
-    private List<Scope> scopes = List.of();
+    private List<Scope> scopes = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(
+            name = "user_prizes",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "prize_id")
+    )
+    private List<Prize> prizes = new ArrayList<>();
 
     @CreationTimestamp private Timestamp createdAt;
     @UpdateTimestamp private Timestamp updatedAt;
 
     public String getRole() {
         return role.getRole();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User user)) return false;
+
+        return getId().equals(user.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
     }
 }

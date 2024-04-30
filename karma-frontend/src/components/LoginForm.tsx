@@ -54,15 +54,16 @@ export default function LoginForm() {
 
   const onSubmit: SubmitHandler<Login> = async (data) => {
     try {
-      const { accessToken: token, refreshToken } = await login({ data });
+      const { accessToken: token } = await login({ data });
       Cookies.set("jwt", token);
-      Cookies.set("refreshToken", refreshToken);
 
       const user = await getCurrentUser({});
       console.log("User after login", user);
       authLogin({ ...user, role: user.role.toLowerCase() as Role });
 
-      navigate("/");
+      if (user.role.toLowerCase() === "organizer") {
+        navigate(`/organizations/${user.organizationId}`);
+      } else navigate("/");
     } catch (error) {
       console.log(error);
       if (error instanceof AxiosError) {
@@ -86,7 +87,15 @@ export default function LoginForm() {
         console.log("Authenticated user after Google signup", user);
         authLogin({ ...user, role: user.role.toLowerCase() as Role });
 
-        navigate("/");
+        console.log(
+          "User after login",
+          user.role,
+          user.organizationId,
+          user.role === "organizer" && !user.organizationId
+        );
+        if (user.role.toLowerCase() === "organizer") {
+          navigate(`/organizations/${user.organizationId}`);
+        } else navigate("/");
       } catch (error) {
         console.log(error);
         if (error instanceof AxiosError) {
@@ -102,7 +111,11 @@ export default function LoginForm() {
   }, []);
 
   if (isPendingGoogle || loginLoading) {
-    return <SpinnerIcon />;
+    return (
+      <div className="flex h-full w-full flex-1 justify-center items-center">
+        <SpinnerIcon />
+      </div>
+    );
   }
 
   if (isErrorGoogle || loginError) {

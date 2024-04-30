@@ -24,12 +24,10 @@ public class Application {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID) private UUID id;
     @NotNull @NotBlank private String motivation;
-    private boolean isApproved;
+    private Boolean isApproved;
+    @NotNull @Builder.Default private Boolean valid = true;
     @NotNull @ManyToOne @JoinColumn(name = "activity_id") private Activity activity;
-    @NotNull @ManyToOne @JoinColumn(name = "user_id") private User user;
-    @OneToMany(mappedBy = "application") private List<Participation> participations = List.of();
-    @CreationTimestamp
-    private Instant dateOfApplication;
-    @UpdateTimestamp
+    @NotNull @ManyToOne @JoinColumn(name = "user_id") private User volunteer;
+    @CreationTimestamp private Instant dateOfApplication;
     private Instant dateOfApproval;
 }

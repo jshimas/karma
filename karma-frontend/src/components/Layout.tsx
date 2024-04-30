@@ -10,7 +10,7 @@ export default function Layout() {
       <div className="flex-1 flex justify-center">
         <Outlet />
       </div>
-      <Footer />
+      {/* <Footer /> */}
       <Toaster />
     </div>
   );

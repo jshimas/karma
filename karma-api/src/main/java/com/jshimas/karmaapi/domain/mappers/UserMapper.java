@@ -21,7 +21,9 @@ import java.util.stream.Collectors;
 import static org.mapstruct.NullValueCheckStrategy.ALWAYS;
 import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring",
+        uses = {ParticipationMapper.class, PrizeMapper.class, AcknowledgementMapper.class},
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class UserMapper {
     @Autowired
     private UserRoleRepository userRoleRepository;
@@ -30,10 +32,14 @@ public abstract class UserMapper {
 
     @Mapping(source = "userCreateDTO.role", target = "role", qualifiedByName = "stringToRole")
     @Mapping(source = "accountType", target = "accountType", qualifiedByName = "stringToAccountType")
+    @Mapping(target = "scopes", ignore = true)
+    @Mapping(target = "locations", ignore = true)
     public abstract User create(UserCreateDTO userCreateDTO, String accountType);
 
     @Mapping(target = "scopes", source = "scopes", qualifiedByName = "scopesToStrings")
+    @Mapping(target = "organizationId", source = "organization.id")
     public abstract UserViewDTO toDTO(User user);
+
     @Mapping(source = "organizationId", target = "organizationId")
     @Mapping(target = "scopes", source = "user.scopes", qualifiedByName = "scopesToStrings")
     public abstract UserViewDTO toDTO(User user, UUID organizationId);

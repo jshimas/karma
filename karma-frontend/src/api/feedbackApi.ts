@@ -2,6 +2,7 @@ import { z } from "zod";
 import api, { HTTPMethod } from "./api";
 import { FeedbackEditSchema, FeedbackSchema } from "../models/Feedback";
 import { EmptySchema, VoidSchema } from "../models/Common";
+import { AcknowledgementCreateSchema } from "../models/Participation";
 
 export const updateFeedback = api<
   z.infer<typeof FeedbackEditSchema>,
@@ -33,5 +34,16 @@ export const deleteFeedback = api<
   method: HTTPMethod.DELETE,
   path: "/organizations/:organizationId/activities/:activityId/feedbacks/:feedbackId",
   requestSchema: VoidSchema,
+  responseSchema: EmptySchema,
+});
+
+export const createAcknowledgement = api<
+  z.infer<typeof AcknowledgementCreateSchema>,
+  z.infer<typeof EmptySchema>,
+  { organizationId: string; activityId: string }
+>({
+  method: HTTPMethod.POST,
+  path: "/organizations/:organizationId/activities/:activityId/acknowledgements",
+  requestSchema: AcknowledgementCreateSchema,
   responseSchema: EmptySchema,
 });

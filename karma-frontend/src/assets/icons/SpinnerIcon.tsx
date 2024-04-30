@@ -1,3 +1,5 @@
+import { cn } from "../../lib/utils";
+
 export default function SpinnerIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -6,7 +8,7 @@ export default function SpinnerIcon({ className }: { className?: string }) {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className={`animate-spin w-6 h-6 ${className}`}
+      className={cn("animate-spin w-6 h-6", className)}
     >
       <path
         strokeLinecap="round"

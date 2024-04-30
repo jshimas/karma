@@ -48,8 +48,8 @@ const MarkerWithInfowindow: React.FC<MarkerProps> = ({
           onCloseClick={() => setInfowindowOpen(false)}
         >
           <div className="py-2 px-8">
-            <div className="flex items-center space-x-6 mb-2">
-              <h1 className="text-lg font-semibold">{activity.name}</h1>
+            <div className="flex items-center mb-2 flex-wrap">
+              <h1 className="text-lg font-semibold mr-6">{activity.name}</h1>
               <div className="flex flex-wrap space-x-2">
                 {activity.scopes.map((scope) => (
                   <Badge key={scope}>{scope}</Badge>

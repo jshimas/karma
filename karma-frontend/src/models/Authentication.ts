@@ -5,12 +5,11 @@ export const LoginSchema = z.object({
     .string()
     .regex(/^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$/, "Please provide a valid email")
     .email("Please provide a valid email"),
-  password: z.string().trim().min(6, "Password must be at least 6 characters"),
+  password: z.string(),
 });
 
-export const LoginResponseSchema = z.object({
-  accessToken: z.string().min(100),
-  refreshToken: z.string().min(10),
+export const GoogleRedirectUrlRequestSchema = z.object({
+  token: z.string().optional().nullable(),
 });
 
 export const GoogleRedirectUrlResponseSchema = z.object({
@@ -31,7 +30,6 @@ export const SendOrganizerInvitationRequestSchema = z.object({
   organizationName: z.string(),
 });
 
-export const AccessTokenRequestSchema = z.object({ refreshToken: z.string() });
 export const AccessTokenResponseSchema = z.object({ accessToken: z.string() });
 
 export type Login = z.infer<typeof LoginSchema>;

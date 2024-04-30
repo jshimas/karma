@@ -15,6 +15,7 @@ import { TimePickerDemo } from "./ui/TimePicker/TimePicker";
 import { Label } from "./ui/Label";
 import MultipleSelector, { Option } from "./ui/MultipleSelector";
 import { Checkbox } from "./ui/Checkbox";
+import { setDefaults, fromPlaceId, GeocodeOptions } from "react-geocode";
 import useGoogle from "react-google-autocomplete/lib/usePlacesAutocompleteService";
 import {
   Command,
@@ -25,7 +26,6 @@ import {
 } from "./ui/Command";
 import { useEffect, useState } from "react";
 import ErrorMessage from "./ErrorMessage";
-import { setDefaults, fromPlaceId, GeocodeOptions } from "react-geocode";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,7 +37,7 @@ import {
   AlertDialogTrigger,
 } from "./ui/Dialog";
 import MyGoogleMap from "./MyGoogleMap";
-import { Marker } from "@vis.gl/react-google-maps";
+import { Marker, useMap } from "@vis.gl/react-google-maps";
 
 const SCOPE_OPTIONS: Option[] = [
   { label: "healthcare", value: "healthcare" },
@@ -45,7 +45,7 @@ const SCOPE_OPTIONS: Option[] = [
   { label: "sports", value: "sports" },
   { label: "culture", value: "culture" },
   { label: "community", value: "community" },
-  { label: "animlals", value: "animlals" },
+  { label: "animals", value: "animals" },
 ];
 
 interface ActivityFormProps {
@@ -91,6 +91,7 @@ export default function ActivityForm({
   useEffect(() => {
     const getCoordinates = async () => {
       console.log(address);
+      if (!address) return;
       const results = await fromPlaceId(address.split("::")[1]);
       setValue("geoLocation", results.results[0].geometry.location);
     };
@@ -98,9 +99,31 @@ export default function ActivityForm({
     getCoordinates();
   }, [address, setValue]);
 
+  const map = useMap();
+  useEffect(() => {
+    if (map) {
+      const bounds = new google.maps.LatLngBounds();
+      if (geoLocation) {
+        bounds.extend(geoLocation);
+      } else {
+        bounds.extend({ lat: 54.9005, lng: 23.92 });
+      }
+      map.fitBounds(bounds);
+      const mapZoom = map.getZoom();
+      if (mapZoom) {
+        map.setZoom(mapZoom > 13 ? 13 : mapZoom);
+      } else {
+        map.setZoom(13);
+      }
+    }
+  }, [map, geoLocation]);
+
   return (
     <div className="w-full h-full flex">
       <div className="flex-1 mx-44 self-center">
+        <h1 className="text-center mb-4 text-2xl font-bold">
+          Fill in activity information
+        </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col justify-center space-y-4">
             <div>
@@ -109,6 +132,19 @@ export default function ActivityForm({
               {errors.name && (
                 <p className="text-destructive text-sm my-1">
                   {errors.name?.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="volunteerNeeded">Volunteers needed</Label>
+              <Input
+                {...register("volunteersNeeded")}
+                placeholder="Volunteers needed"
+              />
+              {errors.volunteersNeeded && (
+                <p className="text-destructive text-sm my-1">
+                  {errors.volunteersNeeded?.message}
                 </p>
               )}
             </div>
@@ -386,7 +422,7 @@ export default function ActivityForm({
         </form>
       </div>
 
-      <div className="w-1/2 h-full bg-teal-200 relative">
+      <div className="w-2/5 h-full bg-teal-200 relative">
         <MyGoogleMap
           center={
             geoLocation

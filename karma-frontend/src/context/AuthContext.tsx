@@ -2,7 +2,6 @@ import React, { createContext, useState, ReactNode, useEffect } from "react";
 import { Role } from "../global";
 import Cookies from "js-cookie";
 import { getCurrentUser } from "../api/usersApi";
-// import { refreshAccessToken } from "../api/authApi";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { UserLocation } from "../models/Users";
 
@@ -13,7 +12,7 @@ type User = {
   email: string;
   role: Role;
   organizationId?: string | null;
-  geoLocations?: UserLocation[];
+  geoLocations?: UserLocation[] | null;
 };
 
 type Status = "idle" | "loading" | "resolved";
@@ -72,21 +71,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else if (jwt && jwt.exp && jwt.exp * 1000 < Number(new Date())) {
         console.log("Token expired. Please log in again.");
       }
-      // else if (Cookies.get("refreshToken") && status === "idle") {
-      //   setStatus("loading");
-      //   try {
-      //     Cookies.remove("jwt");
-      //     const { accessToken } = await refreshAccessToken({
-      //       data: { refreshToken: Cookies.get("refreshToken")! },
-      //     });
-      //     Cookies.set("jwt", accessToken);
-      //     const user = await getCurrentUser({});
-      //     login({ ...user, role: user.role.toLowerCase() as Role });
-      //     console.log("refreshed access token", user);
-      //   } catch (err) {
-      //     console.log(err);
-      //   }
-      // }
 
       setStatus("resolved");
     };
@@ -103,7 +87,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
     setStatus("idle");
     Cookies.remove("jwt");
-    Cookies.remove("refreshToken");
   };
 
   const setUserStatus = (status: Status) => {

@@ -22,44 +22,50 @@ public class UsersInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (!userRepository.existsByEmail("test.admin@karma.com")) {
-            User user = User.builder()
-                    .email("test.admin@karma.com")
-                    .role(userRoleRepository.findByRoleIgnoreCase(UserRole.ADMIN).get())
-                    .firstName("test")
-                    .lastName("admin")
-                    .accountType(accountTypeRepository.findByTypeIgnoreCase(AccountType.EMAIL).get())
-                    .password(passwordEncoder.encode("testadmin")).build();
-
-            userRepository.save(user);
-        }
-
-        if (!userRepository.existsByEmail("test.volunteer@karma.com")) {
-            User user = User.builder()
-                    .email("test.volunteer@karma.com")
-                    .role(userRoleRepository.findByRoleIgnoreCase(UserRole.VOLUNTEER).get())
-                    .firstName("test")
-                    .lastName("volunteer")
-                    .accountType(accountTypeRepository.findByTypeIgnoreCase(AccountType.EMAIL).get())
-                    .password(passwordEncoder.encode("testvolunteer")).build();
-
-            userRepository.save(user);
-        }
-
-        if (!userRepository.existsByEmail("simjustinas@gmail.com")) {
-            Organization organization = organizationRepository.findById(
-                    UUID.fromString("cbe308ea-23b7-4e7a-b07b-39ebfddbd0b7")).get();
-
-            User user = User.builder()
-                    .email("simjustinas@gmail.com")
-                    .role(userRoleRepository.findByRoleIgnoreCase(UserRole.ORGANIZER).get())
-                    .firstName("Justinas")
-                    .lastName("Simas")
-                    .organization(organization)
-                    .accountType(accountTypeRepository.findByTypeIgnoreCase(AccountType.GOOGLE).get())
-                    .build();
-
-            userRepository.save(user);
-        }
+        System.out.println(passwordEncoder.encode("volunteer"));
+        System.out.println(passwordEncoder.encode("organizer"));
+//        if (!userRepository.existsByEmail("john.brown@gmail.com")) {
+//            User user = User.builder()
+//                    .email("test.volunteer@karma.com")
+//                    .role(userRoleRepository.findByRoleIgnoreCase(UserRole.VOLUNTEER).get())
+//                    .firstName("John")
+//                    .lastName("Brown")
+//                    .karmaPoints(0)
+//                    .accountType(accountTypeRepository.findByTypeIgnoreCase(AccountType.EMAIL).get())
+//                    .password(passwordEncoder.encode("volunteer")).build();
+//
+//            userRepository.save(user);
+//        }
+//
+//        if (!userRepository.existsByEmail("simjustinas@gmail.com")) {
+//            Organization organization = organizationRepository.findById(
+//                    UUID.fromString("cbe308ea-23b7-4e7a-b07b-39ebfddbd0b7")).get();
+//
+//            User user = User.builder()
+//                    .email("simjustinas@gmail.com")
+//                    .role(userRoleRepository.findByRoleIgnoreCase(UserRole.ORGANIZER).get())
+//                    .firstName("Justinas")
+//                    .lastName("Simas")
+//                    .karmaPoints(0)
+//                    .organization(organization)
+//                    .accountType(accountTypeRepository.findByTypeIgnoreCase(AccountType.GOOGLE).get())
+//                    .build();
+//
+//            userRepository.save(user);
+//        }
+//
+//        if (!userRepository.existsByEmail("justinas.simas@ktu.edu")) {
+//            User user = User.builder()
+//                    .email("justinas.simas@ktu.edu")
+//                    .role(userRoleRepository.findByRoleIgnoreCase(UserRole.VOLUNTEER).get())
+//                    .firstName("Justinas")
+//                    .lastName("Simas")
+//                    .karmaPoints(0)
+//                    .accountType(accountTypeRepository.findByTypeIgnoreCase(AccountType.EMAIL).get())
+//                    .password(passwordEncoder.encode("justinas"))
+//                    .build();
+//
+//            userRepository.save(user);
+//        }
     }
 }

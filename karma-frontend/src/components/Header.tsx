@@ -33,6 +33,14 @@ export default function Header() {
           >
             Activities
           </Link>
+          {user?.role === "volunteer" && (
+            <Link
+              to={"/prizes"}
+              className="transition text-slate-600 hover:text-teal-700"
+            >
+              Prizes
+            </Link>
+          )}
           {user?.role === "admin" && (
             <Link
               to={"/organizations"}
@@ -42,12 +50,31 @@ export default function Header() {
             </Link>
           )}
           {user?.role === "organizer" && (
-            <Link
-              to={`/organizations/${user?.organizationId}`}
-              className="transition text-slate-600 hover:text-teal-700 mr-4"
-            >
-              My Organization
-            </Link>
+            <>
+              <Link
+                to={`/organizations/${user?.organizationId}`}
+                className="transition text-slate-600 hover:text-teal-700"
+              >
+                My Organization
+              </Link>
+
+              {user?.organizationId && (
+                <>
+                  <Link
+                    to={`/organizations/${user?.organizationId}/volunteers`}
+                    className="transition text-slate-600 hover:text-teal-700"
+                  >
+                    Volunteers
+                  </Link>
+                  <Link
+                    to={`/organizations/${user?.organizationId}/prizes`}
+                    className="transition text-slate-600 hover:text-teal-700"
+                  >
+                    Prizes
+                  </Link>
+                </>
+              )}
+            </>
           )}
         </div>
 
@@ -68,7 +95,8 @@ export default function Header() {
               </Link>
             </>
           ) : (
-            <div>
+            <div className="flex items-center space-x-2 uppercase text-sm text-teal-700 font-bold">
+              <p>{user.role}</p>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant={"link"} className="px-3 py-1 rounded-full">
@@ -76,10 +104,14 @@ export default function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => navigate("/users/me")}>
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+                  {user?.role === "volunteer" && (
+                    <>
+                      <DropdownMenuItem onClick={() => navigate("/users/me")}>
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
                   <DropdownMenuItem
                     onClick={() => {
                       logout();

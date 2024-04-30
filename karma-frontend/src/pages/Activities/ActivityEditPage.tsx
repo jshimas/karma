@@ -58,8 +58,7 @@ export default function ActivityEditPage() {
   }
 
   return (
-    <div className="w-4/5 text-slate-800 my-24 flex flex-col items-center">
-      <h1 className="text-xl mb-6">Fill in Activity details</h1>
+    <>
       <ActivityForm
         onSubmit={onSubmit}
         isSubmitting={editActivityMutation.isPending}
@@ -67,6 +66,6 @@ export default function ActivityEditPage() {
       />
       {error && <p>{error.message}</p>}
       {errorEdit && <p>{errorEdit.message}</p>}
-    </div>
+    </>
   );
 }

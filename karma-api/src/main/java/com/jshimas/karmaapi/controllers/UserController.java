@@ -23,6 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.security.Principal;
@@ -37,8 +38,8 @@ public class UserController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> createUser(@RequestBody @Valid UserCreateDTO userCreateDTO,
-                                        @RequestParam(value = "token", required = false) String token) {
+    public ResponseEntity<?> createUser(@RequestBody @Valid UserCreateDTO userCreateDTO) {
+        String token = userCreateDTO.token();
         ValidationResponse validationResponse = tokenService.validateRegistrationToken(token);
 
         if (!validationResponse.valid()) {
@@ -53,6 +54,9 @@ public class UserController {
                     userCreateDTO.lastName(),
                     userCreateDTO.email(),
                     UserRole.ORGANIZER,
+                    userCreateDTO.bio(),
+                    userCreateDTO.scopes(),
+                    userCreateDTO.geoLocations(),
                     userCreateDTO.password(),
                     userCreateDTO.passwordConfirm()
             );
@@ -73,9 +77,36 @@ public class UserController {
         return userService.getUserInfo(tokenService.extractId(token));
     }
 
+    @GetMapping("/{id}")
+    public UserViewDTO getUser(@PathVariable UUID id) {
+        UserViewDTO allUserInfo = userService.getUserInfo(id);
+        return new UserViewDTO(
+                allUserInfo.id(),
+                allUserInfo.organizationId(),
+                allUserInfo.firstName(),
+                allUserInfo.lastName(),
+                allUserInfo.email(),
+                allUserInfo.role(),
+                allUserInfo.bio(),
+                allUserInfo.imageUrl(),
+                allUserInfo.karmaPoints(),
+                allUserInfo.scopes(),
+                null,
+                allUserInfo.participations(),
+                null,
+                allUserInfo.acknowledgements()
+        );
+    }
+
     @PutMapping("/me")
-    public void updateUser(@AuthenticationPrincipal Jwt token,
+    public UserViewDTO updateUser(@AuthenticationPrincipal Jwt token,
                            @RequestBody @Valid UserEditDTO userEditDTO) {
-        userService.update(tokenService.extractId(token), userEditDTO);
+        return userService.update(tokenService.extractId(token), userEditDTO);
+    }
+
+    @PutMapping("/me/image")
+    public void updateUserImage(@AuthenticationPrincipal Jwt token,
+                           @RequestPart(required = false) MultipartFile image) {
+        userService.updateProfileImage(tokenService.extractId(token), image);
     }
 }

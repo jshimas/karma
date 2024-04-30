@@ -38,9 +38,9 @@ public class AuthController {
 
     @CrossOrigin
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseTokens> login(@Valid @RequestBody AuthRequest authRequest) {
+    public ResponseEntity<AccessTokenResponse> login(@Valid @RequestBody AuthRequest authRequest) {
         try {
-            LoginResponseTokens tokens = authService.login(authRequest);
+            AccessTokenResponse tokens = authService.login(authRequest);
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.AUTHORIZATION, tokens.accessToken())
@@ -49,11 +49,6 @@ public class AuthController {
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-    }
-
-    @PostMapping("/refresh-token")
-    public AccessTokenResponse updateAccessToken(@Valid @RequestBody RefreshTokenRequest request) {
-        return authService.updateAccessToken(request);
     }
 
     @PostMapping("/send-organizer-invitation")
@@ -79,8 +74,7 @@ public class AuthController {
     @GetMapping("/oauth2/google/signup-url")
     public ResponseEntity<OAuth2RedirectUrl> oauthSignupUrl(@RequestParam(value = "token", required = false) String token) {
         tokenService.validateRegistrationToken(token);
-        String registrationUrl = token != null && !token.isBlank() ? SIGNUP_GOOGLE_URL + "?token=" + token : SIGNUP_GOOGLE_URL;
-        String authUrl = googleService.generateAuthorizationCodeRequestUrl(registrationUrl);
+        String authUrl = googleService.generateAuthorizationCodeRequestUrl(SIGNUP_GOOGLE_URL);
         return ResponseEntity.ok(new OAuth2RedirectUrl(authUrl));
     }
 
@@ -93,16 +87,15 @@ public class AuthController {
     @PostMapping("/oauth2/google/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<AccessTokenResponse> createGoogleUser(@RequestBody @Valid GoogleSignupDTO googleSignupDTO,
-                                                                @RequestParam("code") String code,
-                                                                @RequestParam(value = "token", required = false) String token) {
+                                                                @RequestParam("code") String code) {
+        String token = googleSignupDTO.token();
         ValidationResponse validationResponse = tokenService.validateRegistrationToken(token);
 
         if (!validationResponse.valid()) {
             throw new ValidationException(validationResponse.message());
         }
 
-        String registrationUrl = token != null && !token.isBlank() ? SIGNUP_GOOGLE_URL + "?token=" + token : SIGNUP_GOOGLE_URL;
-        GoogleAccountData accountData = googleService.getAccountData(code, registrationUrl);
+        GoogleAccountData accountData = googleService.getAccountData(code, SIGNUP_GOOGLE_URL);
 
         UserViewDTO createdUser;
         if (token != null && !token.isBlank()) {
@@ -121,6 +114,9 @@ public class AuthController {
                     accountData.lastName(),
                     accountData.email(),
                     googleSignupDTO.role(),
+                    googleSignupDTO.bio(),
+                    googleSignupDTO.scopes(),
+                    googleSignupDTO.geoLocations(),
                     accountData.imageUrl()),
                     AccountType.GOOGLE, null);
         }

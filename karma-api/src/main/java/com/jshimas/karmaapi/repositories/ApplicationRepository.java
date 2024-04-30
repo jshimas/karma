@@ -9,4 +9,5 @@ import java.util.UUID;
 
 public interface ApplicationRepository extends JpaRepository<Application, UUID> {
     List<Application> findAllByActivityId(UUID activityId);
+    List<Application> findAllByVolunteerId(UUID userId);
 }

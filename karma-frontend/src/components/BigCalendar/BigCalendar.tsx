@@ -73,7 +73,6 @@ const BigCalendar: React.FC<BigCalendarProps> = ({ activities }) => {
       events={events}
       components={{
         event: ({ event }) => {
-          console.log(event);
           return (
             <Popover>
               <PopoverTrigger asChild>

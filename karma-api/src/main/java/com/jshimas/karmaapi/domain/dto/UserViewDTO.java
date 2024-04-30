@@ -16,9 +16,11 @@ public record UserViewDTO(
         @NotNull @NotBlank String role,
         String bio,
         String imageUrl,
-        @NotNull Integer collectedHours,
+        Integer karmaPoints,
         List<String> scopes,
-        List<UserLocationDTO> geoLocations
-//        List<AcknowledgementViewDTO> acknowledgements
+        List<UserLocationDTO> geoLocations,
+        List<ParticipationViewDTO> participations,
+        List<PrizeViewDTO> prizes,
+        List<AcknowledgementViewDTO> acknowledgements
 ) {
 }

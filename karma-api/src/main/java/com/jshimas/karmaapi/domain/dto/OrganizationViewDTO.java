@@ -21,6 +21,7 @@ public record OrganizationViewDTO(
         String instagram,
         String youtube,
         String linkedin,
+        String imageUrl,
         List<ActivityViewDTO> activities,
 
         Timestamp createdAt,

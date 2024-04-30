@@ -1,5 +1,6 @@
 package com.jshimas.karmaapi.controllers;
 
+import com.jshimas.karmaapi.domain.dto.ApplicationEditDTO;
 import com.jshimas.karmaapi.domain.dto.ApplicationViewDTO;
 import com.jshimas.karmaapi.domain.dto.CreateApplicationRequest;
 import com.jshimas.karmaapi.services.ApplicationService;
@@ -15,8 +16,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
-@Controller
 @RequiredArgsConstructor
+@RestController
 @RequestMapping("/api/v1/organizations/{organizationId}/activities/{activityId}/applications")
 public class ApplicationController {
     private final ApplicationService applicationService;
@@ -38,15 +39,13 @@ public class ApplicationController {
     }
 
     @PutMapping("/{applicationId}")
-    public void updateApplication(@PathVariable("organizationId") UUID organizationId,
-                                  @PathVariable("activityId") UUID activityId,
-                                  @PathVariable("applicationId") UUID applicationId,
-                                  @RequestParam("isApproved") boolean isApproved) {
-        applicationService.update(applicationId, isApproved);
+    public void updateApplication(@PathVariable("applicationId") UUID applicationId,
+                                  @RequestBody ApplicationEditDTO applicationEditDTO) {
+        applicationService.update(applicationId, applicationEditDTO.isApproved());
     }
 
     @GetMapping()
-    public List<ApplicationViewDTO> getAllApplications(@PathVariable("activityId") UUID activityId) {
+    public List<ApplicationViewDTO> getAllApplications(@RequestParam("activityId") UUID activityId) {
         return applicationService.findAllApplications(activityId);
     }
 }

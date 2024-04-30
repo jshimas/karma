@@ -15,7 +15,7 @@ import java.util.Set;
 @Table(name = "scopes")
 public class Scope {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
     @Column(unique = true, nullable = false) private String name;
 
     @ManyToMany(mappedBy = "scopes")

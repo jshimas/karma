@@ -24,7 +24,7 @@ import MultipleSelector, { Option } from "./ui/MultipleSelector";
 import ErrorMessage from "./ErrorMessage";
 import { Textarea } from "./ui/TextArea";
 import { setDefaults, fromPlaceId, GeocodeOptions } from "react-geocode";
-import useGoogle from "react-google-autocomplete/lib/usePlacesAutocompleteService";
+import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocompleteService";
 import PenIcon from "../assets/icons/PenIcon";
 import { Input } from "./ui/Input";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
@@ -75,7 +75,7 @@ export default function UserForm({
     formState: { errors },
   } = useForm<UserEdit>({
     resolver: zodResolver(UserEditSchema),
-    defaultValues: defaultValues || {}, // Use default values if provided
+    defaultValues: defaultValues || {},
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -86,7 +86,7 @@ export default function UserForm({
   const [openAddressSearch, setOpenAddressSearch] = useState(false);
 
   const { placePredictions, getPlacePredictions, isPlacePredictionsLoading } =
-    useGoogle({
+    usePlacesService({
       apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     });
 
@@ -111,6 +111,27 @@ export default function UserForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-2/6 space-y-4">
+      <div>
+        <Controller
+          control={control}
+          name="image"
+          render={({ field: { value, onChange, ...fieldProps } }) => (
+            <div>
+              <Label>Image</Label>
+              <Input
+                {...fieldProps}
+                placeholder="Picture"
+                type="file"
+                accept="image/*, application/pdf"
+                onChange={(event) =>
+                  onChange(event.target.files && event.target.files[0])
+                }
+              />
+            </div>
+          )}
+        />
+      </div>
+
       <div>
         <Label htmlFor="scopes">Scopes</Label>
         <Controller

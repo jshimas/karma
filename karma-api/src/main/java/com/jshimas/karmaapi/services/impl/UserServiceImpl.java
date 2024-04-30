@@ -4,6 +4,7 @@ import com.jshimas.karmaapi.domain.dto.*;
 import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
 import com.jshimas.karmaapi.domain.mappers.AcknowledgementMapper;
 import com.jshimas.karmaapi.domain.mappers.GeoPointMapper;
+import com.jshimas.karmaapi.domain.mappers.ParticipationMapper;
 import com.jshimas.karmaapi.domain.mappers.UserMapper;
 import com.jshimas.karmaapi.entities.*;
 import com.jshimas.karmaapi.repositories.*;
@@ -14,7 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,11 +27,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final OrganizationRepository organizationRepository;
     private final GeoPointMapper geoPointMapper;
     private final AcknowledgementMapper acknowledgementMapper;
     private final ScopeRepository scopeRepository;
     private final UserLocationRepository userLocationRepository;
+    private final StorageService storageService;
 
     @Override
     public User findEntity(UUID id) {
@@ -55,122 +58,140 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Passwords don't match!");
         }
 
-        User user = createUser(userCreateDTO, accountType);
-        user.setOrganization(organization);
-
-        User createdUser = userRepository.save(user);
-
-        return userMapper.toDTO(createdUser);
-    }
-
-    private User createUser(UserCreateDTO userCreateDTO, String accountType) {
         User user = userMapper.create(userCreateDTO, accountType);
 
         if (accountType.equals(AccountType.EMAIL)) {
             user.setPassword(passwordEncoder.encode(userCreateDTO.password()));
         }
 
-        return user;
+        user.setOrganization(organization);
+
+        User createdUser = userRepository.save(user);
+
+        setScopesForUser(createdUser, userCreateDTO.scopes());
+        setLocationsForUser(createdUser, userCreateDTO.geoLocations());
+
+        return userMapper.toDTO(createdUser);
     }
 
     @Override
-    public void update(UUID userId, UserEditDTO userEditDTO) {
+    public UserViewDTO update(UUID userId, UserEditDTO userEditDTO) {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(User.class, userId));
 
-        // Clear all previous scopes
-        existingUser.getScopes().clear();
+        setScopesForUser(existingUser, userEditDTO.scopes());
 
-        List<String> newScopes = userEditDTO.scopes().stream()
+        // Clear all user geolocations
+        userLocationRepository.deleteAll(userLocationRepository.findByUserId(userId));
+        setLocationsForUser(existingUser, userEditDTO.geoLocations());
+
+        userMapper.updateEntityFromDTO(userEditDTO, existingUser);
+        userRepository.save(existingUser);
+
+        return getUserInfo(userId);
+    }
+
+    @Override
+    public void updateProfileImage(UUID userId, MultipartFile image) {
+        User user = findEntity(userId);
+        setUserImage(user, image);
+        userRepository.save(user);
+    }
+
+    private void setUserImage(User user, MultipartFile image) {
+        if (image != null) {
+            try {
+                String imageUrl = storageService.saveImage(image, user.getId() + "_profile_image");
+                user.setImageUrl(imageUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save image", e);
+            }
+        }
+    }
+
+    private void setScopesForUser(User user, List<String> scopes) {
+        if (scopes == null) {
+            return;
+        }
+
+        List<String> newScopes = scopes.stream()
                 .filter(scope -> !scopeRepository.existsByName(scope)).toList();
 
         // Create new scopes and add them to the user
         Set<Scope> scopesToAdd = newScopes.stream()
                 .map(scopeName -> Scope.builder()
                         .name(scopeName)
-                        .users(Set.of(existingUser))
+                        .users(Set.of(user))
                         .build())
                 .collect(Collectors.toSet());
 
         scopeRepository.saveAll(scopesToAdd);
 
         // Add existing scopes to the user
-        userEditDTO.scopes().stream()
+        user.setScopes(new ArrayList<>());
+        scopes.stream()
                 .filter(scope -> !newScopes.contains(scope))
                 .map(scopeRepository::findByName)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(existingScope -> {
-                    existingScope.getUsers().add(existingUser);
-                    existingUser.getScopes().add(existingScope);
+                    existingScope.getUsers().add(user);
+                    user.getScopes().add(existingScope);
                 });
+    }
 
-        // Clear all user geolocations
-        userLocationRepository.deleteAll(userLocationRepository.findByUserId(userId));
-        existingUser.getLocations().clear();
-
+    private void setLocationsForUser(User user, List<UserLocationDTO> userLocations) {
+        if (userLocations == null) {
+            return;
+        }
         // Create new geolocations for the user
-        List<UserLocation> newLocations = userEditDTO.geoLocations().stream()
+        List<UserLocation> newLocations = userLocations.stream()
                 .map(userLocationDTO -> UserLocation.builder()
                         .name(userLocationDTO.name())
                         .location(geoPointMapper.geoPointDtoToPoint(userLocationDTO.location()))
                         .address(userLocationDTO.address())
-                        .user(existingUser)
+                        .user(user)
                         .build())
                 .toList();
 
+        user.setLocations(new ArrayList<>());
+        user.getLocations().addAll(newLocations);
         userLocationRepository.saveAll(newLocations);
-        existingUser.getLocations().addAll(newLocations);
-
-        userMapper.updateEntityFromDTO(userEditDTO, existingUser);
-        userRepository.save(existingUser);
     }
 
     @Override
     public UserViewDTO getUserInfo(UUID userId) {
         User user = findEntity(userId);
-
-        List<Participation> participations = user.getApplications().stream()
-                .flatMap(a -> a.getParticipations().stream())
-                .toList();
-
-        Integer collectedHours = participations
-                .stream()
-                .map(Participation::getHoursWorked)
-                .filter(Objects::nonNull)
-                .reduce(0, Integer::sum);
-
-        List<String> scopes = user.getScopes().stream()
-                .map(Scope::getName)
-                .toList();
+        UserViewDTO userViewDTO = userMapper.toDTO(user);
 
         List<UserLocationDTO> userLocations = user.getLocations().stream()
                 .map(userLocation -> new UserLocationDTO(
-                            userLocation.getId(),
-                            userLocation.getName(),
-                            geoPointMapper.pointToGeoPointDto(userLocation.getLocation()),
-                            userLocation.getAddress())
-                        )
+                        userLocation.getId(),
+                        userLocation.getName(),
+                        geoPointMapper.pointToGeoPointDto(userLocation.getLocation()),
+                        userLocation.getAddress())
+                )
                 .toList();
 
-        List<AcknowledgementViewDTO> userAcks = participations.stream()
-                .flatMap(participation -> participation.getAcknowledgements().stream())
+        List<AcknowledgementViewDTO> acknowledgements = user.getParticipations().stream().flatMap(participation -> participation.getAcknowledgements().stream())
                 .map(acknowledgementMapper::toDTO)
                 .toList();
 
         return new UserViewDTO(
-                user.getId(),
-               user.getOrganization().getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getRole(),
-                user.getBio(),
-                user.getImageUrl(),
-                collectedHours,
-                scopes,
-                userLocations
-//                userAcks
+                userViewDTO.id(),
+                userViewDTO.organizationId(),
+                userViewDTO.firstName(),
+                userViewDTO.lastName(),
+                userViewDTO.email(),
+                userViewDTO.role(),
+                userViewDTO.bio(),
+                userViewDTO.imageUrl(),
+                userViewDTO.karmaPoints(),
+                userViewDTO.scopes(),
+                userLocations,
+                userViewDTO.participations(),
+                userViewDTO.prizes(),
+                acknowledgements
         );
     }
 }

@@ -10,12 +10,15 @@ import java.util.UUID;
 public record ApplicationViewDTO(
         @NotNull UUID id,
         @NotNull UUID userId,
+        @NotNull String firstName,
+        @NotNull String lastName,
+        @NotNull String email,
         @NotNull UUID activityId,
         @NotNull @NotBlank String motivation,
         boolean isApproved,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
         @NotNull Instant dateOfApplication,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-        @NotNull Instant dateOfApproval
+        Instant dateOfApproval
 ) {
 }

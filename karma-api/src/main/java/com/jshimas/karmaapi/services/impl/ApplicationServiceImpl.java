@@ -5,14 +5,17 @@ import com.jshimas.karmaapi.domain.exceptions.NotFoundException;
 import com.jshimas.karmaapi.domain.mappers.ApplicationMapper;
 import com.jshimas.karmaapi.entities.Activity;
 import com.jshimas.karmaapi.entities.Application;
+import com.jshimas.karmaapi.entities.ParticipationType;
 import com.jshimas.karmaapi.entities.User;
 import com.jshimas.karmaapi.repositories.ApplicationRepository;
 import com.jshimas.karmaapi.services.ActivityService;
 import com.jshimas.karmaapi.services.ApplicationService;
+import com.jshimas.karmaapi.services.ParticipationService;
 import com.jshimas.karmaapi.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +26,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final UserService userService;
     private final ActivityService activityService;
     private final ApplicationMapper applicationMapper;
+    private final ParticipationService participationService;
 
     @Override
     public Application findEntity(UUID id) {
@@ -38,7 +42,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         Application application = Application.builder()
                 .motivation(motivation)
-                .user(user)
+                .volunteer(user)
                 .activity(activity)
                 .build();
 
@@ -48,8 +52,16 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public void update(UUID id, boolean isApproved) {
         Application application = findEntity(id);
-        application.setApproved(isApproved);
+        application.setIsApproved(isApproved);
+        application.setDateOfApproval(Instant.now());
         applicationRepository.save(application);
+
+        if (isApproved) {
+            participationService.create(
+                    application.getActivity().getId(),
+                    application.getVolunteer().getId(),
+                    ParticipationType.Application);
+        }
     }
 
     @Override

@@ -15,10 +15,14 @@ import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
 public interface FeedbackMapper {
 
     @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "firstName", source = "user.firstName")
+    @Mapping(target = "lastName", source = "user.lastName")
     @Mapping(target = "activityId", source = "activity.id")
     FeedbackViewDTO toDTO(Feedback feedback);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "user", source = "user")
     @Mapping(target = "activity", source = "activity")
     Feedback create(FeedbackEditDTO feedbackDTO, Activity activity, User user);

@@ -1,25 +1,28 @@
 import { z } from "zod";
 import api, { HTTPMethod } from "./api";
 import {
-  AccessTokenRequestSchema,
   AccessTokenResponseSchema,
+  GoogleRedirectUrlRequestSchema,
   GoogleRedirectUrlResponseSchema,
-  LoginResponseSchema,
   LoginSchema,
   SendOrganizerInvitationRequestSchema,
 } from "../models/Authentication";
-import { ValidationResponseSchema, VoidSchema } from "../models/Common";
+import {
+  EmptySchema,
+  ValidationResponseSchema,
+  VoidSchema,
+} from "../models/Common";
 import { GoogleUserCreateSchema } from "../models/Users";
 
 export const login = api<
   z.infer<typeof LoginSchema>,
-  z.infer<typeof LoginResponseSchema>,
+  z.infer<typeof AccessTokenResponseSchema>,
   null
 >({
   method: HTTPMethod.POST,
   path: "/login",
   requestSchema: LoginSchema,
-  responseSchema: LoginResponseSchema,
+  responseSchema: AccessTokenResponseSchema,
 });
 
 export const logout = api<
@@ -33,25 +36,14 @@ export const logout = api<
   responseSchema: VoidSchema,
 });
 
-export const refreshAccessToken = api<
-  z.infer<typeof AccessTokenRequestSchema>,
-  z.infer<typeof AccessTokenResponseSchema>,
-  null
->({
-  method: HTTPMethod.POST,
-  path: "/refresh-token",
-  requestSchema: AccessTokenRequestSchema,
-  responseSchema: AccessTokenResponseSchema,
-});
-
 export const getGoogleSignupRedirectUrl = api<
-  z.infer<typeof VoidSchema>,
+  z.infer<typeof GoogleRedirectUrlRequestSchema>,
   z.infer<typeof GoogleRedirectUrlResponseSchema>,
   null
 >({
   method: HTTPMethod.GET,
   path: "/oauth2/google/signup-url",
-  requestSchema: VoidSchema,
+  requestSchema: GoogleRedirectUrlRequestSchema,
   responseSchema: GoogleRedirectUrlResponseSchema,
 });
 
@@ -69,10 +61,10 @@ export const getGoogleLoginRedirectUrl = api<
 export const createGoogleUser = api<
   z.infer<typeof GoogleUserCreateSchema>,
   z.infer<typeof AccessTokenResponseSchema>,
-  { code: string; token?: string }
+  { code: string }
 >({
   method: HTTPMethod.POST,
-  path: "/oauth2/google/signup?code=:code&token=:token",
+  path: "/oauth2/google/signup?code=:code",
   requestSchema: GoogleUserCreateSchema,
   responseSchema: AccessTokenResponseSchema,
 });
@@ -90,13 +82,13 @@ export const loginGoogleUser = api<
 
 export const sendOrganizerInvitation = api<
   z.infer<typeof SendOrganizerInvitationRequestSchema>,
-  z.infer<typeof VoidSchema>,
+  z.infer<typeof EmptySchema>,
   null
 >({
   method: HTTPMethod.POST,
   path: "/send-organizer-invitation",
   requestSchema: SendOrganizerInvitationRequestSchema,
-  responseSchema: VoidSchema,
+  responseSchema: EmptySchema,
 });
 
 export const validateRegistrationToken = api<

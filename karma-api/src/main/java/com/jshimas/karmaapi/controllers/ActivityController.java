@@ -33,7 +33,8 @@ public class ActivityController {
                                                         @RequestParam(value = "from", required = false) Instant from,
                                                         @RequestParam(value = "to", required = false) Instant to,
                                                         @AuthenticationPrincipal Jwt token) {
-        UUID userId = tokenService.extractId(token);
+
+        UUID userId = token != null ? tokenService.extractId(token) : null;
         return activityService.findAllActivities(query, scopes, distance, from, to, userId);
     }
 
@@ -71,5 +72,10 @@ public class ActivityController {
         activityService.deleteById(activityId, token);
     }
 
-
+    @Secured({UserRole.ORGANIZER})
+    @PutMapping("/organizations/{organizationId}/activities/{activityId}/resolve")
+    public void resolveActivity(@Valid @RequestBody ResolveActivityRequest request,
+                                           @PathVariable("activityId") UUID activityId){
+        activityService.resolve(activityId, request.volunteerEarnings());
+    }
 }

@@ -1,16 +1,21 @@
 import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
-import { getCurrentUser, updateUser } from "../../api/usersApi";
+import {
+  getCurrentUser,
+  updateProfileImage,
+  updateUser,
+} from "../../api/usersApi";
 import SpinnerIcon from "../../assets/icons/SpinnerIcon";
 import { UserEdit } from "../../models/Users";
 import { SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import UserEditForm from "../../components/UserEditForm";
+import { Role } from "../../global";
 
 export default function ProfileEditPage() {
   const navigate = useNavigate();
   const queryClient = new QueryClient();
-  const { user: authUser } = useAuth();
+  const { user: authUser, login: authLogin } = useAuth();
 
   const {
     data: user,
@@ -23,16 +28,26 @@ export default function ProfileEditPage() {
   });
 
   const editUserMutation = useMutation({
-    mutationFn: async (userEdit: UserEdit) =>
+    mutationFn: async (userEdit: UserEdit) => {
       await updateUser({
-        data: {
-          ...userEdit,
-        },
-      }),
+        data: { ...userEdit },
+      });
+
+      if (userEdit.image) {
+        const formData = new FormData();
+        formData.append("image", userEdit.image);
+        await updateProfileImage({ formData });
+      }
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["profile", authUser?.id],
-      }); // Invalidate the query
+      });
+      const newUser = await getCurrentUser({});
+      if (newUser) {
+        authLogin({ ...newUser, role: newUser?.role.toLowerCase() as Role });
+      }
+      console.log("User updated successfully: ", authUser);
       navigate(`/users/me`);
     },
   });

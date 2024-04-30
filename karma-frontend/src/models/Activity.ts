@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { FeedbackListSchema } from "./Feedback";
+import { ApplicationSchema } from "./Application";
+import { ParticipationSchema } from "./Participation";
 
 export const OptionSchema = z.object({
   label: z.string(),
@@ -39,6 +41,8 @@ export const ActivityEditSchema = z.object({
   address: z.string({
     required_error: "Please provivide an address!",
   }),
+  volunteersNeeded: z.coerce.number().int().min(1, "Please provide a number!"),
+  resolved: z.boolean().default(false),
   scopes: z.array(z.string()).nonempty("Please select at least one scope!"),
   isPublic: z.boolean().default(false),
   description: z
@@ -47,14 +51,46 @@ export const ActivityEditSchema = z.object({
   geoLocation: GeoPointDTOSchema.optional().nullable(),
 });
 
+const UserSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  firstName: z.string(),
+  lastName: z.string(),
+});
+
 export const ActivitySchema = ActivityEditSchema.merge(
   z.object({
     id: z.string(),
     organizationId: z.string(),
+    organizationName: z.string(),
     startDate: z.coerce.date(),
     endDate: z.coerce.date(),
+    applications: z.array(ApplicationSchema).optional(),
+    participations: z.array(ParticipationSchema).optional(),
+    volunteers: z.array(UserSchema).optional().nullable(),
+    feedbacks: FeedbackListSchema.optional(),
   })
 );
+
+export const ResolveActivityValidationSchema = z.object({
+  volunteerEarnings: z.array(
+    z.object({
+      volunteerId: z.string(),
+      date: z.coerce.date(), // TimePicker component requires a date format. Will be converted to hours and minutes before sending to the server
+    })
+  ),
+});
+export type ResolveActivity = z.infer<typeof ResolveActivityValidationSchema>;
+
+export const ResolveActivitySchema = z.object({
+  volunteerEarnings: z.array(
+    z.object({
+      volunteerId: z.string(),
+      hours: z.number().int(),
+      minutes: z.number().int(),
+    })
+  ),
+});
 
 export const ActivityWithFeedbackSchema = ActivitySchema.merge(
   z.object({

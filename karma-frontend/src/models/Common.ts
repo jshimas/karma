@@ -8,5 +8,5 @@ export const EmptySchema = z.string();
 
 export const ValidationResponseSchema = z.object({
   valid: z.boolean(),
-  message: z.string().optional(),
+  message: z.string().optional().nullable(),
 });

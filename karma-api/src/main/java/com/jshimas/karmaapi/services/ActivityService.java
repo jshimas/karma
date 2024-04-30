@@ -1,8 +1,6 @@
 package com.jshimas.karmaapi.services;
 
-import com.jshimas.karmaapi.domain.dto.ActivityEditDTO;
-import com.jshimas.karmaapi.domain.dto.ActivityNoFeedbackDTO;
-import com.jshimas.karmaapi.domain.dto.ActivityViewDTO;
+import com.jshimas.karmaapi.domain.dto.*;
 import com.jshimas.karmaapi.entities.Activity;
 import org.springframework.security.oauth2.jwt.Jwt;
 
@@ -17,4 +15,5 @@ public interface ActivityService {
     List<ActivityNoFeedbackDTO> findAllActivities(String query, List<String> scopes, Integer distance, Instant from, Instant to, UUID userId);
     void deleteById(UUID activityId, Jwt token);
     ActivityViewDTO update(UUID activityId, ActivityEditDTO activityDTO, Jwt token);
+    void resolve(UUID activityId, List<VolunteerEarning> volunteerEarnings);
 }

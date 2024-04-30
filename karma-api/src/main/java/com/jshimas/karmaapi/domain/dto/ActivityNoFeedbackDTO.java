@@ -12,6 +12,7 @@ import java.util.UUID;
 public record ActivityNoFeedbackDTO(
         @NotNull @NotBlank UUID id,
         @NotNull @NotBlank String organizationId,
+        @NotNull @NotBlank String organizationName,
         @NotNull @NotBlank String name,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
         @NotNull Instant startDate,
@@ -21,6 +22,8 @@ public record ActivityNoFeedbackDTO(
         @NotNull @NotBlank String address,
         @NotNull Boolean isPublic,
         @NotNull Set<String> scopes,
+        @NotNull Boolean resolved,
+        @NotNull Integer volunteersNeeded,
         GeoPointDTO geoLocation,
 
         Timestamp createdAt,

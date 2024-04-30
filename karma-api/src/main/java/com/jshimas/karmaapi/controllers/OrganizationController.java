@@ -1,18 +1,19 @@
 package com.jshimas.karmaapi.controllers;
 
-import com.jshimas.karmaapi.domain.dto.OrganizationEditDTO;
-import com.jshimas.karmaapi.domain.dto.OrganizationNoActivitiesDTO;
-import com.jshimas.karmaapi.domain.dto.OrganizationViewDTO;
+import com.jshimas.karmaapi.domain.dto.*;
 import com.jshimas.karmaapi.entities.UserRole;
+import com.jshimas.karmaapi.services.AuthTokenService;
 import com.jshimas.karmaapi.services.OrganizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrganizationController {
     private final OrganizationService organizationService;
+    private final AuthTokenService tokenService;
 
     @GetMapping("/{id}")
     public OrganizationViewDTO getOrganizationById(@PathVariable UUID id) {
@@ -34,10 +36,12 @@ public class OrganizationController {
         return organizationService.findAll();
     }
 
-    @Secured(UserRole.ADMIN)
-    @PostMapping
-    public ResponseEntity<OrganizationNoActivitiesDTO> createOrganization(@Valid @RequestBody OrganizationEditDTO organizationDTO) {
-        OrganizationNoActivitiesDTO createdOrganization = organizationService.create(organizationDTO);
+    @Secured({UserRole.ORGANIZER})
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<OrganizationNoActivitiesDTO> createOrganization(@Valid @ModelAttribute OrganizationEditDTO organizationDTO,
+                                                                          @AuthenticationPrincipal Jwt token) {
+        UUID userId = tokenService.extractId(token);
+        OrganizationNoActivitiesDTO createdOrganization = organizationService.create(organizationDTO, userId);
 
         URI location = URI.create("/api/v1/organizations/" + createdOrganization.id());
 
@@ -45,11 +49,11 @@ public class OrganizationController {
     }
 
     @Secured({UserRole.ADMIN, UserRole.ORGANIZER})
-    @PutMapping("/{id}")
+    @PutMapping(value ="/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public OrganizationViewDTO updateOrganization(@PathVariable("id") UUID id,
-                                   @Valid @RequestBody OrganizationEditDTO organizationDTO,
-                                   @AuthenticationPrincipal Jwt token) {
-        return organizationService.update(id, organizationDTO,  token);
+                                                  @Valid @ModelAttribute OrganizationEditDTO organizationDTO,
+                                                  @AuthenticationPrincipal Jwt token) {
+        return organizationService.update(id, organizationDTO, token);
     }
 
     @Secured(UserRole.ADMIN)
@@ -59,4 +63,35 @@ public class OrganizationController {
         organizationService.deleteById(id);
     }
 
+    @Secured(UserRole.ORGANIZER)
+    @GetMapping("/{organizationId}/volunteers")
+    public List<UserViewDTO> getVolunteers(@PathVariable UUID organizationId,
+                                           @RequestParam(value = "activityId", required = false) UUID activityId,
+                                           @RequestParam(value = "scopes", required = false) List<String> scopes) {
+        List<UserViewDTO> organizationVolunteers = organizationService.getOrganizationVolunteers(organizationId, activityId, scopes);
+        return organizationVolunteers.stream()
+                .map(user -> new UserViewDTO(
+                        user.id(),
+                        null,
+                        user.firstName(),
+                        user.lastName(),
+                        user.email(),
+                        null,
+                        null,
+                        null,
+                        null,
+                        user.scopes(),
+                        null,
+                        user.participations(),
+                        null,
+                        user.acknowledgements()
+                ))
+                .toList();
+    }
+
+    @Secured(UserRole.ORGANIZER)
+    @PutMapping("/{organizationId}/volunteers/cancel-partnership")
+    public void removeVolunteer(@PathVariable UUID organizationId, @RequestBody UserIdsRequest userIdsRequest) {
+        userIdsRequest.userIds().forEach(userId -> organizationService.cancelPartnership(organizationId, userId));
+    }
 }

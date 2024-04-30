@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { HasIDSchema } from "./Common";
 import { ActivityListSchema } from "./Activity";
+import { ParticipationSchema } from "./Participation";
+import { AcknowledgementSchema } from "./Acknowledgement";
 
 export const OrganizationEditSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -50,9 +52,33 @@ export const OrganizationEditSchema = z.object({
     .refine((value) => !value || value?.indexOf("linkedin") !== -1, {
       message: "Invalid linkedin URL",
     }),
+  image: z.instanceof(File).optional(),
 });
 
-export const OrganizationSchema = OrganizationEditSchema.merge(HasIDSchema);
+const VolunteerSchema = z.object({
+  id: z.string().uuid(),
+  firstName: z.string(),
+  lastName: z.string(),
+  email: z.string().email(),
+  scopes: z.array(z.string()),
+  participations: z.array(ParticipationSchema).nullable(),
+  acknowledgements: z.array(AcknowledgementSchema).nullable(),
+});
+
+export const VolunteerListRequestSchema = z.object({
+  activityId: z.string().uuid().optional().nullable(),
+  scopes: z.array(z.string()).optional().nullable(),
+});
+
+export const VolunteerListSchema = z.array(VolunteerSchema);
+
+export const OrganizationSchema = OrganizationEditSchema.merge(
+  HasIDSchema
+).merge(
+  z.object({
+    imageUrl: z.string().optional().nullable(),
+  })
+);
 
 export const OrganizationWithEventsSchema = OrganizationSchema.merge(
   z.object({ activities: ActivityListSchema })

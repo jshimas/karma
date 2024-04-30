@@ -13,7 +13,9 @@ public record ActivityEditDTO(
         @NotNull @NotBlank String description,
         @NotNull @NotBlank String address,
         @NotNull Boolean isPublic,
-        @NotNull Set<String> scopes,
+        @NotNull Boolean resolved,
+        @NotNull Integer volunteersNeeded,
+        Set<String> scopes,
         GeoPointDTO geoLocation
 ) {
 }

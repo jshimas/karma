@@ -8,9 +8,6 @@ import java.util.UUID;
 
 public interface AuthTokenService {
     String generateAccessToken(UUID userId);
-    String generateRefreshToken(UUID userId);
-    String updateAccessToken(String refreshToken);
-    void deleteRefreshToken(UUID userId);
     String generateRegistrationToken(Organization organization);
     ValidationResponse validateRegistrationToken(String token);
     void deleteRegistrationToken(String token);

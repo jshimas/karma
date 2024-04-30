@@ -29,21 +29,29 @@ export default function OrganizationEditPage() {
   });
 
   const editOrganizationMutation = useMutation({
-    mutationFn: async (orgnaizationEdit: OrganizationEdit) =>
+    mutationFn: async (orgnaizationEdit: OrganizationEdit) => {
+      const formData = new FormData();
+      Object.entries(orgnaizationEdit).forEach(([key, value]) => {
+        if (value) {
+          formData.append(key, value);
+        }
+      });
       await updateOrganization({
-        data: orgnaizationEdit,
+        formData,
         params: { id: organizationId! },
-      }),
-    onSuccess: async () =>
+      });
+    },
+    onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["organization", "detail", organizationId],
-      }),
+      });
+      navigate(`/organizations/${organizationId}`);
+    },
   });
 
   const onSubmit: SubmitHandler<OrganizationEdit> = async (data) => {
     try {
       await editOrganizationMutation.mutate(data);
-      navigate(`/organizations/${organizationId}`);
     } catch (error) {
       console.log(error);
       if (error instanceof AxiosError) {
@@ -57,7 +65,7 @@ export default function OrganizationEditPage() {
   }
 
   return (
-    <div className="w-4/5 lg:w-2/3 text-slate-800 m-12">
+    <div className="w-4/5 lg:w-2/3 text-slate-800 mt-24">
       <ReusableOrganizationForm
         onSubmit={onSubmit}
         isSubmitting={editOrganizationMutation.isPending}

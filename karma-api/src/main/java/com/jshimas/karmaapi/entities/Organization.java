@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,8 +31,10 @@ public class Organization {
     private String instagram;
     private String youtube;
     private String linkedin;
+    private String imageUrl;
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL) private List<Activity> activities;
-    @OneToMany(mappedBy = "organization") private List<User> organizers;
+    @OneToMany(mappedBy = "organization") private List<User> organizers = new ArrayList<>();
+    @OneToMany(mappedBy = "organization") private List<Prize> prizes;
 
     @CreationTimestamp private Timestamp createdAt;
     @UpdateTimestamp private Timestamp updatedAt;

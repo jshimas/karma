@@ -54,6 +54,8 @@ export default function api<Request, Response, Parameters>({
         headers,
       });
 
+      console.log("api response", response.data);
+
       return responseSchema.parse(response.data);
     }
 

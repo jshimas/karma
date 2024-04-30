@@ -6,6 +6,7 @@ public record AcknowledgementViewDTO(
         String activityName,
         String organizationId,
         String organizationName,
-        String text
+        String text,
+        String createdAt
 ) {
 }
